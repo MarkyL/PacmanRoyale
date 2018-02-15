@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Pacman Royale</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+
+    // titles
+    <string name="skills">Skills</string>
+    <string name="play">Play</string>
+    <string name="settings">Settings</string>
+    <string name="exp">Exp</string>
+    <string name="currencyBar">Currency</string>
+    <string name="find_a_match">Find a match</string>
+    <string name="fight_vs_ai">Fight VS. AI</string>
+
+
+    // misc
+    <string name="facebook_application_id">1591855007566489</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="title_activity_play">PlayActivity</string>
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+</resources>

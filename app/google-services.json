@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "901258240992",
+    "firebase_url": "https://pacman-royale.firebaseio.com",
+    "project_id": "pacman-royale",
+    "storage_bucket": "pacman-royale.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901258240992:android:336598e1b62553fc",
+        "android_client_info": {
+          "package_name": "com.example.mark.pacmanroyale"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "901258240992-h82dd74le4lea6s375d0fcdlekt1gcjb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAX3deLDnIMszw8BUjS_l5OGOzqFZP32LM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
