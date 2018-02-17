@@ -1,8 +1,12 @@
-package com.example.mark.pacmanroyale;
+package com.example.mark.pacmanroyale.Activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.LinearLayout;
+
+import com.example.mark.pacmanroyale.DrawingView;
+import com.example.mark.pacmanroyale.R;
 
 
 public class PlayActivity extends AppCompatActivity {
@@ -14,11 +18,12 @@ public class PlayActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_play);
+        activity = this;
+        LinearLayout surfaceView = (LinearLayout)findViewById(R.id.middleSurface);
         drawingView = new DrawingView(this);
-        setContentView(drawingView); //(R.layout.activity_play);
-//        activity = this;
-//        SurfaceView surfaceView = (SurfaceView)findViewById(R.id.surfaceView);
-//        surfaceView=drawingView;
+        surfaceView.addView(drawingView);
+        
     }
 
     @Override

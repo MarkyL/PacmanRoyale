@@ -10,15 +10,20 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:label="@string/app_name">
+            android:name=".Activities.PlayActivity"
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
+        <activity android:name=".Activities.LogInActivity" />
+        <activity android:name=".Activities.SignUpActivity" />
+        <activity
+            android:name=".Activities.MainActivity"
+            android:label="@string/title_activity_test2"
+            android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+
         </activity>
-        <activity android:name=".PlayActivity"></activity>
     </application>
 
 </manifest>
