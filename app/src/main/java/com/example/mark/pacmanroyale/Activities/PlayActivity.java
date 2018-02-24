@@ -23,7 +23,6 @@ public class PlayActivity extends AppCompatActivity {
         LinearLayout surfaceView = (LinearLayout)findViewById(R.id.middleSurface);
         drawingView = new DrawingView(this);
         surfaceView.addView(drawingView);
-        
     }
 
     @Override
@@ -38,5 +37,11 @@ public class PlayActivity extends AppCompatActivity {
         Log.d(TAG, "onPause");
         super.onPause();
         drawingView.pause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //Utils.setUserPresenceOffline(this);
     }
 }

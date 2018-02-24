@@ -37,14 +37,29 @@
     <string name="title_activity_login">Sign in</string>
     <string name="add_item">Add New Item</string>
     <string name="action_logout">Logout</string>
-    <string name="title_activity_main2">Main2Activity</string>
     <string name="action_settings">Settings</string>
     <string name="section_format">Hello World from section: %1$d</string>
-    <string name="title_activity_test_for_tabs">test_for_tabs</string>
-    <string name="title_activity_test_tabs">test_tabs</string>
-    <string name="title_activity_test2">test2</string>
-    <string name="tab_text_1">Tab 1</string>
+       <string name="tab_text_1">Tab 1</string>
     <string name="tab_text_2">Tab 2</string>
     <string name="tab_text_3">Tab 3</string>
+
+    // Firebase Database values
+    <string name="users_node">users</string>
+    <string name="pacman_node">pacman</string>
+    <string name="ghost_node">ghost</string>
+    <string name="level">level</string>
+    <string name="experience">experience</string>
+    <string name="xPos">xPos</string>
+    <string name="yPos">yPos</string>
+    <string name="user_presence">status</string>
+    <string name="waiting_room">WaitingRoom</string>
+    <string name="ghostWaitingList">ghostWaitingList</string>
+    <string name="pacmanWaitingList">pacmanWaitingList</string>
+
+    <string-array name="status_array">
+        <item><string name="online">Online</string></item>
+        <item><string name="playing">Playing</string></item>
+        <item><string name="offline">Offline</string></item>
+    </string-array>
 
 </resources>

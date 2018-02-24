@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mark.pacmanroyale">
-
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -9,14 +9,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity
-            android:name=".Activities.PlayActivity"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
-        <activity android:name=".Activities.LogInActivity" />
-        <activity android:name=".Activities.SignUpActivity" />
+
         <activity
             android:name=".Activities.MainActivity"
-            android:label="@string/title_activity_test2"
+            android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -24,6 +20,16 @@
             </intent-filter>
 
         </activity>
+
+
+    <activity
+        android:name=".Activities.PlayActivity"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
+    <activity android:name=".Activities.LogInActivity" />
+    <activity android:name=".Activities.SignUpActivity" />
     </application>
 
+    <meta-data
+        android:name="com.facebook.sdk.ApplicationId"
+        android:value="@string/facebook_application_id"/>
 </manifest>

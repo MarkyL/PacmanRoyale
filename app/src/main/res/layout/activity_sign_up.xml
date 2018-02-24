@@ -40,4 +40,6 @@
         android:layout_below="@+id/passwordField"
         android:text="@string/sign_up_text" />
 
+
+
 </RelativeLayout>

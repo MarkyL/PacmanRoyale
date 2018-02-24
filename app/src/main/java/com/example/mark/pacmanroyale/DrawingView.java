@@ -14,6 +14,12 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.example.mark.pacmanroyale.Activities.MainActivity;
+import com.example.mark.pacmanroyale.User.Ghost;
+import com.example.mark.pacmanroyale.User.UserInformation;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 /**
  * Created by Mark on 14/02/2018.
@@ -39,6 +45,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     
     private int xPosPacman;                 // x-axis position of pacman
     private int yPosPacman;                 // y-axis position of pacman
+
+    private Ghost ghost;
     private int xPosGhost;                  // x-axis position of ghost
     private int yPosGhost;                  // y-axis position of ghost
     int xDistance;
@@ -84,10 +92,49 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         yPosPacman = 13 * blockSize;
 
         loadBitmapImages();
-
+        //loadGhostAndPacman();
+        registerGhostToFireBaseDataBase();
         Log.d(TAG, "DrawingView: Constructor finished");
     }
 
+//    private void loadGhostAndPacman() {
+//        Utils.getFireBaseDataBase().addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                String userId = Utils.getUserInformation().getUserId();
+//                int ghostLevel= -1, ghostEXP= -1, xPosGhost= -1, yPosGhost= -1;
+//                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+//                    ghostLevel = ds.child(userId).getValue(UserInformation.class).getGhost().getLevel();
+//                    ghostEXP = ds.child(userId).getValue(UserInformation.class).getGhost().getExperience();
+//                    xPosGhost = ds.child(userId).getValue(UserInformation.class).getGhost().getxPos();
+//                    yPosGhost = ds.child(userId).getValue(UserInformation.class).getGhost().getyPos();
+//                }
+//                ghost = new Ghost(ghostLevel, ghostEXP, xPosGhost, yPosGhost);
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
+
+    private void registerGhostToFireBaseDataBase() {
+        Utils.getFireBaseDataBase().addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                for(DataSnapshot ds : dataSnapshot.getChildren()) {
+                    xPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getxPos();
+                    yPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getyPos();
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
     @Override
     public void surfaceCreated(SurfaceHolder surfaceHolder) {
         Log.d(TAG, "Surface Created");
@@ -197,9 +244,19 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 // Draw the pellets
                 drawPellets(canvas);
 
+                updatePositionsToDB();
+
                 surfaceHolder.unlockCanvasAndPost(canvas);
             }
         }
+    }
+
+    private void updatePositionsToDB() {
+        DatabaseReference usersRef = Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(Utils.getUserInformation().getUserId());
+        DatabaseReference pacmanRef = usersRef.child(getResources().getString(R.string.pacman_node));
+        DatabaseReference ghostRef = usersRef.child(getResources().getString(R.string.ghost_node));
+        (pacmanRef.child(getResources().getString(R.string.xPos))).setValue(xPosPacman);
+        (pacmanRef.child(getResources().getString(R.string.yPos))).setValue(yPosPacman);
     }
 
     // Method that draws pellets and updates them when eaten
@@ -276,6 +333,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         } else if (direction == 3) {
             xPosPacman += -blockSize/15;
         }
+
     }
 
     // Method that draws pacman based on his viewDirection
@@ -299,103 +357,103 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private void moveGhost(Canvas canvas) {
             short ch;
 
-            xDistance = xPosPacman - xPosGhost;
-            yDistance = yPosPacman - yPosGhost;
-
-            if ((xPosGhost % blockSize == 0) && (yPosGhost % blockSize == 0)) {
-                ch = leveldata1[yPosGhost / blockSize][xPosGhost / blockSize];
-
-                if (xPosGhost >= blockSize * 17) {
-                    xPosGhost = 0;
-                }
-                if (xPosGhost < 0) {
-                    xPosGhost = blockSize * 17;
-                }
-
-
-                if (xDistance >= 0 && yDistance >= 0) { // Move right and down
-                    if ((ch & 4) == 0 && (ch & 8) == 0) {
-                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
-                            ghostDirection = 1;
-                        } else {
-                            ghostDirection = 2;
-                        }
-                    }
-                    else if ((ch & 4) == 0) {
-                        ghostDirection = 1;
-                    }
-                    else if ((ch & 8) == 0) {
-                        ghostDirection = 2;
-                    }
-                    else
-                        ghostDirection = 3;
-                }
-                if (xDistance >= 0 && yDistance <= 0) { // Move right and up
-                    if ((ch & 4) == 0 && (ch & 2) == 0 ) {
-                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
-                            ghostDirection = 1;
-                        } else {
-                            ghostDirection = 0;
-                        }
-                    }
-                    else if ((ch & 4) == 0) {
-                        ghostDirection = 1;
-                    }
-                    else if ((ch & 2) == 0) {
-                        ghostDirection = 0;
-                    }
-                    else ghostDirection = 2;
-                }
-                if (xDistance <= 0 && yDistance >= 0) { // Move left and down
-                    if ((ch & 1) == 0 && (ch & 8) == 0) {
-                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
-                            ghostDirection = 3;
-                        } else {
-                            ghostDirection = 2;
-                        }
-                    }
-                    else if ((ch & 1) == 0) {
-                        ghostDirection = 3;
-                    }
-                    else if ((ch & 8) == 0) {
-                        ghostDirection = 2;
-                    }
-                    else ghostDirection = 1;
-                }
-                if (xDistance <= 0 && yDistance <= 0) { // Move left and up
-                    if ((ch & 1) == 0 && (ch & 2) == 0) {
-                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
-                            ghostDirection = 3;
-                        } else {
-                            ghostDirection = 0;
-                        }
-                    }
-                    else if ((ch & 1) == 0) {
-                        ghostDirection = 3;
-                    }
-                    else if ((ch & 2) == 0) {
-                        ghostDirection = 0;
-                    }
-                    else ghostDirection = 2;
-                }
-                // Handles wall collisions
-                if ( (ghostDirection == 3 && (ch & 1) != 0) ||
-                        (ghostDirection == 1 && (ch & 4) != 0) ||
-                        (ghostDirection == 0 && (ch & 2) != 0) ||
-                        (ghostDirection == 2 && (ch & 8) != 0) ) {
-                    ghostDirection = 4;
-                }
-            }
-
-            if (ghostDirection == 0) {
-                yPosGhost += -blockSize / 20;
-            } else if (ghostDirection == 1) {
-                xPosGhost += blockSize / 20;
-            } else if (ghostDirection == 2) {
-                yPosGhost += blockSize / 20;
-            } else if (ghostDirection == 3) {
-                xPosGhost += -blockSize / 20;
-            }
+//            xDistance = xPosPacman - xPosGhost;
+//            yDistance = yPosPacman - yPosGhost;
+//
+//            if ((xPosGhost % blockSize == 0) && (yPosGhost % blockSize == 0)) {
+//                ch = leveldata1[yPosGhost / blockSize][xPosGhost / blockSize];
+//
+//                if (xPosGhost >= blockSize * 17) {
+//                    xPosGhost = 0;
+//                }
+//                if (xPosGhost < 0) {
+//                    xPosGhost = blockSize * 17;
+//                }
+//
+//
+//                if (xDistance >= 0 && yDistance >= 0) { // Move right and down
+//                    if ((ch & 4) == 0 && (ch & 8) == 0) {
+//                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
+//                            ghostDirection = 1;
+//                        } else {
+//                            ghostDirection = 2;
+//                        }
+//                    }
+//                    else if ((ch & 4) == 0) {
+//                        ghostDirection = 1;
+//                    }
+//                    else if ((ch & 8) == 0) {
+//                        ghostDirection = 2;
+//                    }
+//                    else
+//                        ghostDirection = 3;
+//                }
+//                if (xDistance >= 0 && yDistance <= 0) { // Move right and up
+//                    if ((ch & 4) == 0 && (ch & 2) == 0 ) {
+//                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
+//                            ghostDirection = 1;
+//                        } else {
+//                            ghostDirection = 0;
+//                        }
+//                    }
+//                    else if ((ch & 4) == 0) {
+//                        ghostDirection = 1;
+//                    }
+//                    else if ((ch & 2) == 0) {
+//                        ghostDirection = 0;
+//                    }
+//                    else ghostDirection = 2;
+//                }
+//                if (xDistance <= 0 && yDistance >= 0) { // Move left and down
+//                    if ((ch & 1) == 0 && (ch & 8) == 0) {
+//                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
+//                            ghostDirection = 3;
+//                        } else {
+//                            ghostDirection = 2;
+//                        }
+//                    }
+//                    else if ((ch & 1) == 0) {
+//                        ghostDirection = 3;
+//                    }
+//                    else if ((ch & 8) == 0) {
+//                        ghostDirection = 2;
+//                    }
+//                    else ghostDirection = 1;
+//                }
+//                if (xDistance <= 0 && yDistance <= 0) { // Move left and up
+//                    if ((ch & 1) == 0 && (ch & 2) == 0) {
+//                        if (Math.abs(xDistance) > Math.abs(yDistance)) {
+//                            ghostDirection = 3;
+//                        } else {
+//                            ghostDirection = 0;
+//                        }
+//                    }
+//                    else if ((ch & 1) == 0) {
+//                        ghostDirection = 3;
+//                    }
+//                    else if ((ch & 2) == 0) {
+//                        ghostDirection = 0;
+//                    }
+//                    else ghostDirection = 2;
+//                }
+//                // Handles wall collisions
+//                if ( (ghostDirection == 3 && (ch & 1) != 0) ||
+//                        (ghostDirection == 1 && (ch & 4) != 0) ||
+//                        (ghostDirection == 0 && (ch & 2) != 0) ||
+//                        (ghostDirection == 2 && (ch & 8) != 0) ) {
+//                    ghostDirection = 4;
+//                }
+//            }
+//
+//            if (ghostDirection == 0) {
+//                yPosGhost += -blockSize / 20;
+//            } else if (ghostDirection == 1) {
+//                xPosGhost += blockSize / 20;
+//            } else if (ghostDirection == 2) {
+//                yPosGhost += blockSize / 20;
+//            } else if (ghostDirection == 3) {
+//                xPosGhost += -blockSize / 20;
+//            }
 
             canvas.drawBitmap(ghostBitmap, xPosGhost, yPosGhost, paint);
     }
