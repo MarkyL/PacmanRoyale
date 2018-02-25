@@ -54,6 +54,7 @@ public class MainActivity extends AppCompatActivity {
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
 
+    private UserInformation userInformation;
 
 
     private static MediaPlayer player;
@@ -112,6 +113,10 @@ public class MainActivity extends AppCompatActivity {
 
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+
+
+
         if (mFirebaseUser != null) {
             // user already signed in
             Log.d(TAG, mFirebaseAuth.getCurrentUser().getEmail());
@@ -131,10 +136,13 @@ public class MainActivity extends AppCompatActivity {
     // This function loads the user's details such as - ghost/pacman level and exp.
     public void loadUserDetails() {
         final String currentUserId = mFirebaseAuth.getUid(); // .child(userId)
+        userInformation = new UserInformation();
+        userInformation.setUserId(currentUserId);
+        Utils.setUserInformation(userInformation);
         Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                UserInformation userInformation = null;// = new UserInformation();
+
                 for(DataSnapshot ds : dataSnapshot.getChildren()) {
                     if (ds.getKey().equals(currentUserId)) {
                         userInformation = ds.getValue(UserInformation.class);
@@ -149,7 +157,7 @@ public class MainActivity extends AppCompatActivity {
                     //int ghostExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getExperience();
                     //userInformation.setGhost(new Ghost(ghostLevel, ghostExperience, 0, 0));
                 }
-                Utils.setUserInformation(userInformation);
+
                 setUserPresence();
                 //Log.d(TAG, "onDataChange:  pacman = " +userInformation.getPacman() );
                 //Log.d(TAG, "onDataChange:  ghost = " +userInformation.getGhost());
@@ -170,34 +178,41 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // get waiting room changes to map
+                if (dataSnapshot.getValue() == null) {
+                    return;
+                }
                 Map<String, ArrayList<String>> pacmanWaitingMap = (HashMap<String, ArrayList<String>>) dataSnapshot
                         .child(getString(R.string.pacmanWaitingList)).getValue();
                 Map<String, ArrayList<String>> ghostWaitingMap = (HashMap<String, ArrayList<String>>) dataSnapshot
                         .child(getString(R.string.ghostWaitingList)).getValue();
 
                 // pour the maps into array lists
-                ArrayList<String> pacmanWaitingList = new ArrayList<>(pacmanWaitingMap.keySet());
-                ArrayList<String> ghostWaitingList = new ArrayList<>(ghostWaitingMap.keySet());
+                ArrayList<String> pacmanWaitingList;
+                ArrayList<String> ghostWaitingList;
+                if (pacmanWaitingMap != null) {
+                    pacmanWaitingList = new ArrayList<>(pacmanWaitingMap.keySet());
+                    Utils.getWaitingRoom().setPacmanWaitingList(pacmanWaitingList);
+                }
+                if (ghostWaitingMap != null) {
+                    ghostWaitingList = new ArrayList<>(ghostWaitingMap.keySet());
+                    Utils.getWaitingRoom().setGhostWaitingList(ghostWaitingList);
+                }
 
                 // update the waiting room lists
-                Utils.getWaitingRoom().setPacmanWaitingList(pacmanWaitingList);
-                Utils.getWaitingRoom().setGhostWaitingList(ghostWaitingList);
-
-
 
                 //for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                    //waitingRoom = ds.getValue(WaitingRoom.class);
-                    //Log.d(TAG, "onDataChange()");
-                    //pacmanWaitingList = (ArrayList<String>) ds.child(getString(R.string.pacmanWaitingList)).getValue();
-                    //map = (HashMap<String, ArrayList<String>>) dataSnapshot.getValue();
+                //waitingRoom = ds.getValue(WaitingRoom.class);
+                //Log.d(TAG, "onDataChange()");
+                //pacmanWaitingList = (ArrayList<String>) ds.child(getString(R.string.pacmanWaitingList)).getValue();
+                //map = (HashMap<String, ArrayList<String>>) dataSnapshot.getValue();
 
 //                    List<String> values = (List<String>) td.values();
 //                    waitingRoom.setPacmanWaitingList(new ArrayList<>(values));
-                    //}
-                    //Log.d(TAG, "onDataChange: map = "+td.toString());
+                //}
+                //Log.d(TAG, "onDataChange: map = "+td.toString());
 
-                    // Utils.setWaitingRoom(waitingRoom);
-                    //waitingRoom.setPacmanWaitingList(map.get(0));
+                // Utils.setWaitingRoom(waitingRoom);
+                //waitingRoom.setPacmanWaitingList(map.get(0));
 
                 //}
             }
@@ -207,9 +222,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(TAG, "onCancelled() error: " + databaseError.getMessage());
             }
         });
-
     }
-
 
     //TODO: remove this - since we clear activity stack there is no result!!!
     @Override

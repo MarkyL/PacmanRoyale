@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.mark.pacmanroyale.Activities.PlayActivity;
+import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Utils;
 
@@ -17,6 +18,7 @@ import com.example.mark.pacmanroyale.Utils;
 
 public class Tab_Play extends Fragment implements View.OnClickListener {
 
+    private static final String TAG = "Tab_Play";
 
 
     @Override
@@ -32,21 +34,24 @@ public class Tab_Play extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+
         switch (view.getId()) {
             case (R.id.playBtn): {
                 Utils.setUserPresenceSearchingForGhost(getContext());
                 Intent playIntent = new Intent(getContext(), PlayActivity.class);
                 startActivity(playIntent);
-            } break;
+            }
+            break;
             case (R.id.playAsPacmanBtn): {
-                Utils.getWaitingRoom().addPacmanPlayer(Utils.getUserInformation().getUserId());
-                //searchForMatchAsPacman();
-                Utils.getWaitingRoom().setUpVirtualRoom();
-            } break;
+                Utils.getWaitingRoom().beginMatchMaking(GameMode.PACMAN);
+            }
+            break;
             case (R.id.playAsGhostBtn): {
-                Utils.getWaitingRoom().addGhostPlayer(Utils.getUserInformation().getUserId());
-            }break;
+                Utils.getWaitingRoom().beginMatchMaking(GameMode.GHOST);
+            }
+            break;
         }
     }
 
-}
+    }
+
