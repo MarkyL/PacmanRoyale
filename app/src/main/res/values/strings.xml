@@ -53,13 +53,24 @@
     <string name="yPos">yPos</string>
     <string name="user_presence">status</string>
     <string name="waiting_room">WaitingRoom</string>
+    <string name="virtual_room">VirtualRoom</string>
     <string name="ghostWaitingList">ghostWaitingList</string>
     <string name="pacmanWaitingList">pacmanWaitingList</string>
+
 
     <string-array name="status_array">
         <item><string name="online">Online</string></item>
         <item><string name="playing">Playing</string></item>
         <item><string name="offline">Offline</string></item>
     </string-array>
+
+    // firebase Virtual room values
+    <string name="pacman_id">pacmanID</string>
+    <string name="ghost_id">ghostID</string>
+    <string name="pacmanXPos">pacmanXPos</string>
+    <string name="pacmanYPos">pacmanYPos</string>
+    <string name="ghostXPos">ghostXPos</string>
+    <string name="ghostYPos">ghostYPos</string>
+
 
 </resources>

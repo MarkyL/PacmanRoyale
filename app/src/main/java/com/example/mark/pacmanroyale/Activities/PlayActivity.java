@@ -12,6 +12,7 @@ import com.example.mark.pacmanroyale.R;
 public class PlayActivity extends AppCompatActivity {
 
     private static final String TAG = "PlayActivity";
+    private static final String GAME_MODE = "GAME_MODE";
     static PlayActivity activity;
     private DrawingView drawingView;
 
@@ -20,8 +21,8 @@ public class PlayActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         activity = this;
-        LinearLayout surfaceView = (LinearLayout)findViewById(R.id.middleSurface);
-        drawingView = new DrawingView(this);
+        LinearLayout surfaceView = findViewById(R.id.middleSurface);
+        drawingView = new DrawingView(this, getIntent().getBooleanExtra(GAME_MODE, false));
         surfaceView.addView(drawingView);
     }
 

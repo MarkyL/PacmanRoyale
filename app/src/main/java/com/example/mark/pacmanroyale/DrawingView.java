@@ -15,7 +15,7 @@ import android.view.SurfaceView;
 
 import com.example.mark.pacmanroyale.Activities.MainActivity;
 import com.example.mark.pacmanroyale.User.Ghost;
-import com.example.mark.pacmanroyale.User.UserInformation;
+import com.example.mark.pacmanroyale.User.Pacman;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -32,7 +32,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private Thread mThread;
     private SurfaceHolder surfaceHolder;
     private boolean canDraw = true;
-    
+
+    private DatabaseReference virtualRoomReference;
+    private DatabaseReference virtualRoomGhostReference;
+    private DatabaseReference virtualRoomPacmanReference;
+
     private Paint paint;
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap[] arrowRight, arrowDown, arrowLeft, arrowUp;
@@ -42,11 +46,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private int currentPacmanFrame = 0;     // Current Pacman frame to draw
     private int currentArrowFrame = 0;      // Current arrow frame to draw
     private long frameTicker;               // Current time since last frame has been drawn
-    
+
+    private Pacman mPacman;
     private int xPosPacman;                 // x-axis position of pacman
     private int yPosPacman;                 // y-axis position of pacman
 
-    private Ghost ghost;
+    private boolean isPacmanGameMode;
+
+    private Ghost mGhost;
     private int xPosGhost;                  // x-axis position of ghost
     private int yPosGhost;                  // y-axis position of ghost
     int xDistance;
@@ -75,7 +82,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     };
 
     // Initializing the member variables
-    public DrawingView(Context context) {
+    public DrawingView(Context context, boolean isPacmanGameMode) {
         super(context);
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
@@ -91,9 +98,19 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         xPosPacman = 8 * blockSize ;
         yPosPacman = 13 * blockSize;
 
+        virtualRoomReference = Utils.getVirtualRoomReference();
+        virtualRoomGhostReference = virtualRoomReference.child(getResources().getString(R.string.ghost_node));
+        virtualRoomPacmanReference = virtualRoomReference.child(getResources().getString(R.string.pacman_node));
+        this.isPacmanGameMode = isPacmanGameMode;
+
         loadBitmapImages();
         //loadGhostAndPacman();
-        registerGhostToFireBaseDataBase();
+        if (isPacmanGameMode) {
+            registerGhostToFireBaseDataBase();
+        } else {
+            registerPacmanToFireBaseDataBase();
+        }
+
         Log.d(TAG, "DrawingView: Constructor finished");
     }
 
@@ -118,14 +135,38 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 //            }
 //        });
 //    }
-
+//virtualRoomGhostReference
     private void registerGhostToFireBaseDataBase() {
-        Utils.getFireBaseDataBase().addValueEventListener(new ValueEventListener() {
+        virtualRoomGhostReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                    xPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getxPos();
-                    yPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getyPos();
+                    //xPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getxPos();
+                    //yPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getyPos();
+                    mGhost = dataSnapshot.getValue(Ghost.class);
+                    if (mGhost != null) {
+                        xPosGhost = mGhost.getxPos();
+                        yPosGhost = mGhost.getyPos();
+                    }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    private void registerPacmanToFireBaseDataBase() {
+        virtualRoomPacmanReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                //xPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getxPos();
+                //yPosGhost = ds.child(Utils.getUserInformation().getUserId()).getValue(UserInformation.class).getGhost().getyPos();
+                mPacman = dataSnapshot.getValue(Pacman.class);
+                Log.d(TAG, "onDataChange() mPacman Key = " +dataSnapshot.getKey());
+                if (mPacman != null) {
+                    xPosPacman = mPacman.getxPos();
+                    yPosPacman = mPacman.getyPos();
                 }
             }
 
@@ -236,10 +277,15 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
                 updateFrame(System.currentTimeMillis());
 
-                moveGhost(canvas);
+//                moveGhost(canvas);
+//                // Moves the pacman based on his direction
+//                movePacman(canvas);
 
-                // Moves the pacman based on his direction
-                movePacman(canvas);
+                if (isPacmanGameMode) {
+                    moveCharacter(canvas, xPosPacman, yPosPacman, isPacmanGameMode);
+                } else {
+                    moveCharacter(canvas, xPosGhost, yPosGhost, isPacmanGameMode);
+                }
 
                 // Draw the pellets
                 drawPellets(canvas);
@@ -252,11 +298,13 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     }
 
     private void updatePositionsToDB() {
-        DatabaseReference usersRef = Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(Utils.getUserInformation().getUserId());
-        DatabaseReference pacmanRef = usersRef.child(getResources().getString(R.string.pacman_node));
-        DatabaseReference ghostRef = usersRef.child(getResources().getString(R.string.ghost_node));
-        (pacmanRef.child(getResources().getString(R.string.xPos))).setValue(xPosPacman);
-        (pacmanRef.child(getResources().getString(R.string.yPos))).setValue(yPosPacman);
+        if (isPacmanGameMode) {
+            virtualRoomPacmanReference.child(getResources().getString(R.string.xPos)).setValue(xPosPacman);
+            virtualRoomPacmanReference.child(getResources().getString(R.string.yPos)).setValue(yPosPacman);
+        } else {
+            virtualRoomGhostReference.child(getResources().getString(R.string.xPos)).setValue(xPosGhost);
+            virtualRoomGhostReference.child(getResources().getString(R.string.yPos)).setValue(yPosGhost);
+        }
     }
 
     // Method that draws pellets and updates them when eaten
@@ -274,6 +322,89 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
     }
 
+    // Updates the character sprite and handles collisions
+    public void moveCharacter(Canvas canvas, int charXPos, int charYPos, boolean isPacman) {
+        short ch;
+
+        // Check if xPos and yPos of pacman is both a multiple of block size
+        if ( (charXPos % blockSize == 0) && (charYPos  % blockSize == 0) ) {
+
+            // When pacman goes through tunnel on
+            // the right reappear at left tunnel
+            if (charXPos >= blockSize * 17) {
+                charXPos = 0;
+            }
+
+            // Is used to find the number in the level array in order to
+            // check wall placement, pellet placement, and candy placement
+            ch = leveldata1[charYPos / blockSize][charXPos / blockSize];
+
+            // If there is a pellet, eat it
+            if ((ch & 16) != 0) {
+                // Toggle pellet so it won't be drawn anymore
+                leveldata1[charYPos / blockSize][charXPos / blockSize] = (short) (ch ^ 16);
+                currentScore += 10;
+            }
+
+            // Checks for direction buffering
+            if (!((nextDirection == 3 && (ch & 1) != 0) ||
+                    (nextDirection == 1 && (ch & 4) != 0) ||
+                    (nextDirection == 0 && (ch & 2) != 0) ||
+                    (nextDirection == 2 && (ch & 8) != 0))) {
+                viewDirection = direction = nextDirection;
+            }
+
+            // Checks for wall collisions
+            if ((direction == 3 && (ch & 1) != 0) ||
+                    (direction == 1 && (ch & 4) != 0) ||
+                    (direction == 0 && (ch & 2) != 0) ||
+                    (direction == 2 && (ch & 8) != 0)) {
+                direction = 4;
+            }
+        }
+
+        // When pacman goes through tunnel on
+        // the left reappear at right tunnel
+        if (charXPos < 0) {
+            charXPos = blockSize * 17;
+        }
+
+
+        if (isPacman) {
+            xPosPacman = charXPos;
+            yPosPacman = charYPos;
+            drawPacman(canvas);
+            canvas.drawBitmap(ghostBitmap, xPosGhost, yPosGhost, paint);
+        } else {
+            xPosGhost = charXPos;
+            yPosGhost = charYPos;
+            canvas.drawBitmap(ghostBitmap, charXPos, charYPos, paint);
+            drawPacman(canvas);
+        }
+        // Depending on the direction move the position of pacman
+        if (isPacman) {
+            if (direction == 0) {
+                yPosPacman += -blockSize / 15;
+            } else if (direction == 1) {
+                xPosPacman += blockSize / 15;
+            } else if (direction == 2) {
+                yPosPacman += blockSize / 15;
+            } else if (direction == 3) {
+                xPosPacman += -blockSize / 15;
+            }
+        } else {
+                if (direction == 0) {
+                    yPosGhost += -blockSize / 15;
+                } else if (direction == 1) {
+                    xPosGhost += blockSize / 15;
+                } else if (direction == 2) {
+                    yPosGhost += blockSize / 15;
+                } else if (direction == 3) {
+                    xPosGhost += -blockSize / 15;
+                }
+        }
+
+    }
     // Updates the character sprite and handles collisions
     public void movePacman(Canvas canvas) {
         short ch;

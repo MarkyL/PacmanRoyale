@@ -139,26 +139,21 @@ public class MainActivity extends AppCompatActivity {
         userInformation = new UserInformation();
         userInformation.setUserId(currentUserId);
         Utils.setUserInformation(userInformation);
-        Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).addListenerForSingleValueEvent(new ValueEventListener() {
+        Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                userInformation = dataSnapshot.getValue(UserInformation.class);
+                userInformation.setUserId(dataSnapshot.getKey());
+//                    int pacmanLevel = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getPacman().getLevel();
+//                    int pacmanExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getPacman().getExperience();
+//                    userInformation.setPacman(new Pacman(pacmanLevel, pacmanExperience, 0, 0));
+//                    int ghostLevel = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getLevel();
+//                    int ghostExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getExperience();
+//                    userInformation.setGhost(new Ghost(ghostLevel, ghostExperience, 0, 0));
 
-                for(DataSnapshot ds : dataSnapshot.getChildren()) {
-                    if (ds.getKey().equals(currentUserId)) {
-                        userInformation = ds.getValue(UserInformation.class);
-                        //Map<String, String> data = (HashMap<String,String>)ds.getValue();
-                        userInformation.setUserId(ds.getKey());
-                    }
-
-                    //int pacmanLevel = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getPacman().getLevel();
-                    //int pacmanExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getPacman().getExperience();
-                    //userInformation.setPacman(new Pacman(pacmanLevel, pacmanExperience, 0, 0));
-                    //int ghostLevel = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getLevel();
-                    //int ghostExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getExperience();
-                    //userInformation.setGhost(new Ghost(ghostLevel, ghostExperience, 0, 0));
-                }
 
                 setUserPresence();
+                Utils.setUserInformation(userInformation);
                 //Log.d(TAG, "onDataChange:  pacman = " +userInformation.getPacman() );
                 //Log.d(TAG, "onDataChange:  ghost = " +userInformation.getGhost());
             }

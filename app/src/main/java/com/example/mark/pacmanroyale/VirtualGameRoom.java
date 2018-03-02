@@ -30,6 +30,7 @@ public class VirtualGameRoom {
             myPacman = Utils.getUserInformation().getPacman();
             //enemyGhost =
         }
+
         Log.d(TAG, "VirtualGameRoom() created, me = " + userID1 + " as " + (amIPacman ? "Pacman" : "Ghost")
                 + "| enemy = " + userID2 + " as " + (amIPacman ? "Ghost" : "Pacman"));
     }

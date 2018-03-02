@@ -15,6 +15,7 @@ public class Utils {
 
     private static WaitingRoom waitingRoom;
     private static UserInformation userInformation;
+    private static DatabaseReference virtualRoomReference;
 
     public static DatabaseReference getFireBaseDataBase(){
         return FirebaseDatabase.getInstance().getReference();
@@ -30,6 +31,20 @@ public class Utils {
 
     public static DatabaseReference getFireBaseGhostWaitingList(Context context) {
         return FirebaseDatabase.getInstance().getReference(context.getString(R.string.waiting_room)).child(context.getString(R.string.ghostWaitingList));
+    }
+
+    public static DatabaseReference getFireBaseVirtualRoomReference(Context context) {
+        return FirebaseDatabase.getInstance().getReference(context.getString(R.string.virtual_room));
+    }
+
+    public static void setVirtualRoomReference(DatabaseReference dbReference) {
+        if (dbReference != null) {
+            virtualRoomReference = dbReference;
+        }
+    }
+
+    public static DatabaseReference getVirtualRoomReference() {
+        return virtualRoomReference;
     }
 
     public static void setUserInformation(UserInformation information){

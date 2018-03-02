@@ -44,8 +44,7 @@ public class Tab_Play extends Fragment implements View.OnClickListener {
             break;
             case (R.id.playAsPacmanBtn): {
                 Utils.getWaitingRoom().beginMatchMaking(GameMode.PACMAN);
-            }
-            break;
+            } break;
             case (R.id.playAsGhostBtn): {
                 Utils.getWaitingRoom().beginMatchMaking(GameMode.GHOST);
             }
