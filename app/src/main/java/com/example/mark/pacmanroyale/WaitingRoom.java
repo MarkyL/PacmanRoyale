@@ -235,8 +235,7 @@ public class WaitingRoom {
                 Log.d(TAG, "ghost sets his virtualRoomID params to = " + virtualRoomID);
                 DatabaseReference virtualRoomReference = Utils.getFireBaseVirtualRoomReference(context).child(virtualRoomID);
                 virtualRoomReference.child(context.getString(R.string.ghost_id)).setValue(userID);
-                virtualRoomReference.child(context.getString(R.string.ghost_node))
-                        .setValue(Utils.getUserInformation().getPacman());
+                virtualRoomReference.child(context.getString(R.string.ghost_node)).setValue(Utils.getUserInformation().getPacman());
                 Utils.setVirtualRoomReference(virtualRoomReference);
                 //  }
                 dbWaitingListReference.removeValue();
@@ -296,8 +295,7 @@ public class WaitingRoom {
             Log.d(TAG, "onPostExecute() virtualRoomID = " + virtualRoomID);
             DatabaseReference virtualRoomReference = Utils.getFireBaseVirtualRoomReference(context).child(virtualRoomID);
             virtualRoomReference.child(context.getString(R.string.pacman_id)).setValue(userID);
-            virtualRoomReference.child(context.getString(R.string.pacman_node))
-                    .setValue(Utils.getUserInformation().getPacman());
+            virtualRoomReference.child(context.getString(R.string.pacman_node)).setValue(Utils.getUserInformation().getPacman());
             Utils.setVirtualRoomReference(virtualRoomReference);
 
             Utils.setUserPresencePlaying(context);
