@@ -1,11 +1,17 @@
 package com.example.mark.pacmanroyale.Activities;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import com.example.mark.pacmanroyale.DrawingView;
+import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
 
 
@@ -22,7 +28,8 @@ public class PlayActivity extends AppCompatActivity {
         setContentView(R.layout.activity_play);
         activity = this;
         LinearLayout surfaceView = findViewById(R.id.middleSurface);
-        drawingView = new DrawingView(this, getIntent().getBooleanExtra(GAME_MODE, false));
+        GameMode result = (GameMode)getIntent().getSerializableExtra(GAME_MODE);
+        drawingView = new DrawingView(this, result);
         surfaceView.addView(drawingView);
     }
 
@@ -45,4 +52,8 @@ public class PlayActivity extends AppCompatActivity {
         super.onDestroy();
         //Utils.setUserPresenceOffline(this);
     }
+
+
+
+
 }

@@ -243,7 +243,7 @@ public class WaitingRoom {
 
                 Utils.setUserPresencePlaying(context);
                 Intent playIntent = new Intent(context, PlayActivity.class);
-                playIntent.putExtra(GAME_MODE, gameMode==GameMode.PACMAN);
+                playIntent.putExtra(GAME_MODE, gameMode);
                 context.startActivity(playIntent);
             }
 
@@ -302,7 +302,7 @@ public class WaitingRoom {
 
             Utils.setUserPresencePlaying(context);
             Intent playIntent = new Intent(context, PlayActivity.class);
-            playIntent.putExtra(GAME_MODE, gameMode == GameMode.PACMAN);
+            playIntent.putExtra(GAME_MODE, gameMode);
             context.startActivity(playIntent);
         }
 
