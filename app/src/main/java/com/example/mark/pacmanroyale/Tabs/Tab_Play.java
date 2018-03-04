@@ -6,6 +6,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 
 import com.example.mark.pacmanroyale.Activities.PlayActivity;
 import com.example.mark.pacmanroyale.Enums.GameMode;
@@ -19,6 +20,8 @@ import com.example.mark.pacmanroyale.Utils;
 public class Tab_Play extends Fragment implements View.OnClickListener {
 
     private static final String TAG = "Tab_Play";
+    private ImageView imageView;
+    private static final String GAME_MODE = "GAME_MODE";
 
 
     @Override
@@ -39,6 +42,7 @@ public class Tab_Play extends Fragment implements View.OnClickListener {
             case (R.id.playBtn): {
                 Utils.setUserPresenceSearchingForGhost(getContext());
                 Intent playIntent = new Intent(getContext(), PlayActivity.class);
+                playIntent.putExtra(GAME_MODE, GameMode.VS_PC);
                 startActivity(playIntent);
             }
             break;

@@ -7,5 +7,7 @@ package com.example.mark.pacmanroyale.Enums;
 public enum GameMode {
         PACMAN,
         GHOST,
-        QUICK_MATCH
+        QUICK_MATCH,
+        VS_PC
+
 }

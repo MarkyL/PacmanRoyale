@@ -53,8 +53,19 @@
         android:id="@+id/facebook_signup_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/logOutBtn"
-        android:layout_centerInParent="true"
-        android:gravity="center"/>
+        android:layout_below="@+id/signUpText"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="11dp"
+        android:gravity="center" />
+
+    <com.google.android.gms.common.SignInButton
+        android:id="@+id/sign_in_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/facebook_signup_btn"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="28dp"
+        android:gravity="center" />
+
 
 </RelativeLayout>
