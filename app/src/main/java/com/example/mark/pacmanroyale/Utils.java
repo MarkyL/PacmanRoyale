@@ -17,8 +17,15 @@ public class Utils {
     private static UserInformation userInformation;
     private static DatabaseReference virtualRoomReference;
 
+    private static VirtualGameRoom virtualGameRoom;
+
+    private static int enemyBlockSize;
+
     public static DatabaseReference getFireBaseDataBase(){
         return FirebaseDatabase.getInstance().getReference();
+    }
+    public static DatabaseReference getFireBaseUsersNodeReference(Context context) {
+        return getFireBaseDataBase().child(context.getString(R.string.users_node));
     }
 
     public static DatabaseReference getUserFireBaseDataBaseReference(Context context){
@@ -99,5 +106,20 @@ public class Utils {
         }
     }
 
+    public static VirtualGameRoom getVirtualGameRoom() {
+        return virtualGameRoom;
+    }
+
+    public static void setVirtualGameRoom(VirtualGameRoom virtualGameRoom) {
+        Utils.virtualGameRoom = virtualGameRoom;
+    }
+
+    public static int getEnemyBlockSize() {
+        return enemyBlockSize;
+    }
+
+    public static void setEnemyBlockSize(int enemyBlockSize) {
+        Utils.enemyBlockSize = enemyBlockSize;
+    }
 
 }

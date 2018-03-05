@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 0;
+    private static final int BLOCK_SIZE_DIVIDER = 17;
+
     private TextView mTextMessage;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
@@ -129,16 +131,22 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
 
-
-
         if (mFirebaseUser != null) {
             // user already signed in
             Log.d(TAG, mFirebaseAuth.getCurrentUser().getEmail());
+            setScreenWidthSize();
             loadUserDetails();
             initWaitingRoom();
         } else { // user not logged in.
             loadLogInView();
         }
+    }
+
+    private void setScreenWidthSize() {
+        int screenWidth = getResources().getDisplayMetrics().widthPixels;
+//        int blockSize = screenWidth / BLOCK_SIZE_DIVIDER;
+//        blockSize = (blockSize / 5) * 5;
+        Utils.getFireBaseDataBase().child(getString(R.string.users_node)).child(mFirebaseAuth.getUid()).child(getString(R.string.screenWidth)).setValue(screenWidth);
     }
 
     private void setUserPresence() {

@@ -11,6 +11,8 @@ public class UserInformation {
     private String userId;
     private Pacman pacman;
     private Ghost ghost;
+    //private int blocksize;
+    private int screenwidth;
 
     private String status;
     private VirtualGameRoom virtualGameRoom;
@@ -56,6 +58,17 @@ public class UserInformation {
         this.userId = userId;
     }
 
+//    public int getblocksize() { return blocksize;  }
+//
+//    public void setblocksize(int blockSize) { this.blocksize = blockSize; }
+
+    public int getScreenwidth() {
+        return screenwidth;
+    }
+
+    public void setScreenwidth(int screenwidth) {
+        this.screenwidth = screenwidth;
+    }
     @Override
     public String toString() {
         return "UserInformation{" +

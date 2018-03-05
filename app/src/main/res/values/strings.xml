@@ -71,6 +71,8 @@
     <string name="pacmanYPos">pacmanYPos</string>
     <string name="ghostXPos">ghostXPos</string>
     <string name="ghostYPos">ghostYPos</string>
+    <string name="blockSize">blocksize</string>
+    <string name="screenWidth">screenwidth</string>
 
 
 </resources>
