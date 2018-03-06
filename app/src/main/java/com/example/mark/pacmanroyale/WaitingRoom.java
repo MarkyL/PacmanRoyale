@@ -240,6 +240,7 @@ public class WaitingRoom {
                 virtualRoomReference.child(context.getString(R.string.ghost_id)).setValue(userID);
                 virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.level)).setValue(Utils.getUserInformation().getPacman().getLevel());
                 virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.experience)).setValue(Utils.getUserInformation().getPacman().getExperience());
+                virtualRoomReference.onDisconnect().removeValue();
                 Utils.setVirtualRoomReference(virtualRoomReference);
                 //  }
                 dbWaitingListReference.removeValue();
@@ -326,6 +327,7 @@ public class WaitingRoom {
             virtualRoomReference.child(context.getString(R.string.pacman_id)).setValue(userID);
             virtualRoomReference.child(context.getString(R.string.pacman_node)).child(context.getString(R.string.level)).setValue(Utils.getUserInformation().getPacman().getLevel());
             virtualRoomReference.child(context.getString(R.string.pacman_node)).child(context.getString(R.string.experience)).setValue(Utils.getUserInformation().getPacman().getExperience());
+            virtualRoomReference.onDisconnect().removeValue();
             Utils.setVirtualRoomReference(virtualRoomReference);
 
             Utils.setUserPresencePlaying(context);

@@ -1,18 +1,14 @@
 package com.example.mark.pacmanroyale.Activities;
 
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 
 import com.example.mark.pacmanroyale.DrawingView;
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
+import com.example.mark.pacmanroyale.Utils;
 
 
 public class PlayActivity extends AppCompatActivity {
@@ -49,6 +45,8 @@ public class PlayActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onDestroy: PlayActivity called");
+        Utils.getVirtualRoomReference().removeValue();
         super.onDestroy();
         //Utils.setUserPresenceOffline(this);
     }

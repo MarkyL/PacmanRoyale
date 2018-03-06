@@ -38,4 +38,7 @@ public class VirtualGameRoom {
         return userID2;
     }
 
+    public void disconnectVirtualGameRoom() {
+
+    }
 }

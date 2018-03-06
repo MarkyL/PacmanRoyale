@@ -487,6 +487,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             // the right reappear at left tunnel
             if (charXPos >= blockSize * 17) {
                 charXPos = 0;
+                if (gameMode == GameMode.PACMAN) {
+                    xPosPacmanForEnemy = 0;
+                } else {
+                    xPosGhostForEnemy = 0;
+                }
             }
 
             // Is used to find the number in the level array in order to
@@ -521,13 +526,19 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         // the left reappear at right tunnel
         if (charXPos < 0) {
             charXPos = blockSize * 17;
+            if (gameMode == GameMode.PACMAN) {
+                xPosPacmanForEnemy = enemyBlockSize * 17;
+            } else {
+                xPosGhostForEnemy = enemyBlockSize * 17;
+            }
         }
 
 
         if (isPacman == GameMode.PACMAN) {
             xPosPacman = charXPos;
             yPosPacman = charYPos;
-
+//            Log.d(TAG, "moveCharacter: xpospacman="+xPosPacman +"xpospacmanForEnemy="+xPosPacmanForEnemy);
+//            Log.d(TAG, "moveCharacter: ypospacman="+yPosPacman +"ypospacmanForEnemy="+yPosPacmanForEnemy);
             drawPacman(canvas);
 //            setEnemyGhostDirection();
 //            if (isGhostDirectionChanged) {
