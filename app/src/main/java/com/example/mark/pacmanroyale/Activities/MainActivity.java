@@ -1,11 +1,9 @@
 package com.example.mark.pacmanroyale.Activities;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.Signature;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -13,7 +11,6 @@ import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -52,24 +49,18 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 0;
-    private static final int BLOCK_SIZE_DIVIDER = 17;
 
-    private TextView mTextMessage;
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
 
     private UserInformation userInformation;
 
+    private Tab_Skills tab_skills;
+    private Tab_Play tab_play;
+    private Tab_Settings tab_settings;
 
-    private static MediaPlayer player;
-
-    private android.support.v4.app.FragmentManager fragmentManager;
-    FragmentTransaction fragmentTransaction;
-
-    Tab_Skills tab_skills;
-    Tab_Play tab_play;
-    Tab_Settings tab_settings;
-
+    private ViewPager mViewPager;
+    private ImageView loadingScreen;
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -84,14 +75,11 @@ public class MainActivity extends AppCompatActivity {
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    private ViewPager mViewPager;
-    private ImageView loadingScreen;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
 
         loadingScreen = findViewById(R.id.loading_screen);
 
@@ -103,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 3000);
 
-        printHashKey(this);
+        printHashKey();
 
         //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         //setSupportActionBar(toolbar);
@@ -115,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
         mViewPager = findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
+        TabLayout tabLayout = findViewById(R.id.tabs);
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
@@ -130,7 +118,6 @@ public class MainActivity extends AppCompatActivity {
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
-
         if (mFirebaseUser != null) {
             // user already signed in
             Log.d(TAG, mFirebaseAuth.getCurrentUser().getEmail());
@@ -142,13 +129,15 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Used for sending x/y positions according to enemy's blockSize.
+    // I'm setting my screen width, he will listen to this path and retrieve it
+    // to convert his x/y to my x/y coordinates.
     private void setScreenWidthSize() {
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-//        int blockSize = screenWidth / BLOCK_SIZE_DIVIDER;
-//        blockSize = (blockSize / 5) * 5;
         Utils.getFireBaseDataBase().child(getString(R.string.users_node)).child(mFirebaseAuth.getUid()).child(getString(R.string.screenWidth)).setValue(screenWidth);
     }
 
+    // set user status to ONLINE, turn OFFLINE when he goes off.
     private void setUserPresence() {
         Utils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).setValue(UserPresence.ONLINE);
         Utils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).onDisconnect().setValue(UserPresence.OFFLINE);
@@ -157,36 +146,28 @@ public class MainActivity extends AppCompatActivity {
 
     // This function loads the user's details such as - ghost/pacman level and exp.
     public void loadUserDetails() {
-        final String currentUserId = mFirebaseAuth.getUid(); // .child(userId)
+        final String currentUserId = mFirebaseAuth.getUid();
         userInformation = new UserInformation();
         userInformation.setUserId(currentUserId);
         Utils.setUserInformation(userInformation);
         Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d(TAG, "loadUserDetails() - onDataChange ");
                 userInformation = dataSnapshot.getValue(UserInformation.class);
                 userInformation.setUserId(dataSnapshot.getKey());
-//                    int pacmanLevel = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getPacman().getLevel();
-//                    int pacmanExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getPacman().getExperience();
-//                    userInformation.setPacman(new Pacman(pacmanLevel, pacmanExperience, 0, 0));
-//                    int ghostLevel = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getLevel();
-//                    int ghostExperience = ds.child(userInformation.getUserId()).getValue(UserInformation.class).getGhost().getExperience();
-//                    userInformation.setGhost(new Ghost(ghostLevel, ghostExperience, 0, 0));
-
-
                 setUserPresence();
                 Utils.setUserInformation(userInformation);
-                //Log.d(TAG, "onDataChange:  pacman = " +userInformation.getPacman() );
-                //Log.d(TAG, "onDataChange:  ghost = " +userInformation.getGhost());
             }
-
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
+                Log.d(TAG, "loadUserDetails() - onCancelled: " + databaseError.getMessage());
             }
         });
     }
 
+    // initializing the waiting room as soon as I'm in the app,
+    // to load all the current waiting player lists.
     public void initWaitingRoom() {
         final WaitingRoom waitingRoom = new WaitingRoom(this);
         Utils.setWaitingRoom(waitingRoom);
@@ -214,24 +195,6 @@ public class MainActivity extends AppCompatActivity {
                     ghostWaitingList = new ArrayList<>(ghostWaitingMap.keySet());
                     Utils.getWaitingRoom().setGhostWaitingList(ghostWaitingList);
                 }
-
-                // update the waiting room lists
-
-                //for (DataSnapshot ds : dataSnapshot.getChildren()) {
-                //waitingRoom = ds.getValue(WaitingRoom.class);
-                //Log.d(TAG, "onDataChange()");
-                //pacmanWaitingList = (ArrayList<String>) ds.child(getString(R.string.pacmanWaitingList)).getValue();
-                //map = (HashMap<String, ArrayList<String>>) dataSnapshot.getValue();
-
-//                    List<String> values = (List<String>) td.values();
-//                    waitingRoom.setPacmanWaitingList(new ArrayList<>(values));
-                //}
-                //Log.d(TAG, "onDataChange: map = "+td.toString());
-
-                // Utils.setWaitingRoom(waitingRoom);
-                //waitingRoom.setPacmanWaitingList(map.get(0));
-
-                //}
             }
 
             @Override
@@ -305,9 +268,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
-        public void printHashKey(Context pContext) {
+        public void printHashKey() {
+        // used to generate a hash key for SHA-1 code.
             try {
                 PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
                 Log.d(TAG, "printHashKey: Im before loop" + info.toString());
@@ -383,7 +345,5 @@ public class MainActivity extends AppCompatActivity {
                     return null;
             }
         }
-
-
     }
 }

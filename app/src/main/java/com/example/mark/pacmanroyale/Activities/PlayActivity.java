@@ -1,13 +1,11 @@
 package com.example.mark.pacmanroyale.Activities;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.DrawingView;
 import com.example.mark.pacmanroyale.Enums.GameMode;
@@ -19,7 +17,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
 
     private static final String TAG = "PlayActivity";
     private static final String GAME_MODE = "GAME_MODE";
-    static PlayActivity activity;
+    private static PlayActivity activity;
     private DrawingView drawingView;
     private ImageView loaderImage;
 

@@ -3,7 +3,6 @@ package com.example.mark.pacmanroyale.Activities;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -51,6 +50,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     protected EditText passwordEditText;
     protected Button logInButton;
     protected TextView signUpTextView;
+    protected SignInButton signInButton;
 
     protected LoginButton facebookSignUp;
     private FirebaseAuth mFirebaseAuth;
@@ -62,26 +62,15 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         FacebookSdk.sdkInitialize(this);
         setContentView(R.layout.activity_log_in);
+
         // Initialize FirebaseAuth
         mFirebaseAuth = FirebaseAuth.getInstance();
         FacebookSdk.setApplicationId(getResources().getString(R.string.facebook_application_id));
 
         callbackManager = CallbackManager.Factory.create();
 
-        signUpTextView = findViewById(R.id.signUpText);
-        emailEditText = findViewById(R.id.emailField);
-        passwordEditText = findViewById(R.id.passwordField);
-        logInButton = findViewById(R.id.loginButton);
-        logInButton.setOnClickListener(this);
-        facebookSignUp = findViewById(R.id.facebook_signup_btn);
-        facebookSignUp.setOnClickListener(this);
-        facebookSignUp.setReadPermissions("email","public_profile");
-
-        // Set the dimensions of the sign-in button.
-        SignInButton signInButton = findViewById(R.id.sign_in_button);
-        signInButton.setSize(SignInButton.SIZE_STANDARD);
-
-        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        initUI();
+        setOnClickListeners();
 
         // Configure sign-in to request the user's ID, email address, and basic
         // profile. ID and basic profile are included in DEFAULT_SIGN_IN.
@@ -91,16 +80,25 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 .build();
         // Build a GoogleSignInClient with the options specified by gso.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
-
-        signUpTextView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LogInActivity.this, SignUpActivity.class);
-                startActivity(intent);
-            }
-        });
     }
 
+    private void initUI() {
+        signUpTextView = findViewById(R.id.signUpText);
+        emailEditText = findViewById(R.id.emailField);
+        passwordEditText = findViewById(R.id.passwordField);
+        logInButton = findViewById(R.id.loginButton);
+        facebookSignUp = findViewById(R.id.facebook_signup_btn);
+        signInButton = findViewById(R.id.sign_in_button);
+        signInButton.setSize(SignInButton.SIZE_STANDARD);
+    }
+
+    private void setOnClickListeners() {
+        logInButton.setOnClickListener(this);
+        facebookSignUp.setOnClickListener(this);
+        facebookSignUp.setReadPermissions("email","public_profile");
+        findViewById(R.id.sign_in_button).setOnClickListener(this);
+        signUpTextView.setOnClickListener(this);
+    }
 
 
     private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
@@ -207,17 +205,12 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                 Toast.makeText(LogInActivity.this, "Logged in Successfully!", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "Login success, "+loginResult.getAccessToken().getUserId()+
                         "\n" + loginResult.getAccessToken().getToken());
-
                 handleFacebookAccessToken(loginResult.getAccessToken());
-
-
             }
-
             @Override
             public void onCancel() {
                 Toast.makeText(LogInActivity.this, "Login cancelled", Toast.LENGTH_SHORT).show();
             }
-
             @Override
             public void onError(FacebookException error) {
                 Toast.makeText(LogInActivity.this, "Error facebook Signup", Toast.LENGTH_SHORT).show();
@@ -251,10 +244,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
                             Toast.makeText(LogInActivity.this, "auth failed", Toast.LENGTH_SHORT).show();
-
                         }
-
-                        // ...
                     }
                 });
     }
@@ -262,8 +252,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-
 
         if (requestCode == RC_SIGN_IN) {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
@@ -275,13 +263,10 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
                 Log.w(TAG, "Google sign in failed", e);
-                // ...
             }
         }
-
         callbackManager.onActivityResult(requestCode, resultCode, data);
     }
-
 
     private void initUserDefaultData() {
 
@@ -294,11 +279,10 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         DatabaseReference ghostReference = userReference.child(getString(R.string.ghost_node));
 
         userReference.child(getString(R.string.user_presence)).setValue(UserPresence.ONLINE);
-        pacmanReference.setValue(new Pacman(1,0,-1,-1));
-        ghostReference.setValue(new Pacman(1,0,-1,-1));
+        pacmanReference.setValue(pacman);
+        //pacmanReference.setValue(new Pacman(1,0,-1,-1));
+        ghostReference.setValue(ghost);
+        //ghostReference.setValue(new Pacman(1,0,-1,-1));
 
     }
-
-
-
 }

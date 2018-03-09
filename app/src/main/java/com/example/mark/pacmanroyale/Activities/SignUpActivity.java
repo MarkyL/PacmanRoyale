@@ -32,7 +32,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //FacebookSdk.sdkInitialize(getApplicationContext());
 
         setContentView(R.layout.activity_sign_up);
 
@@ -43,8 +42,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         emailEditText = findViewById(R.id.emailField);
         signUpButton = findViewById(R.id.signupButton);
         signUpButton.setOnClickListener(this);
-
-
     }
 
     @Override
@@ -104,27 +101,16 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         Ghost ghost = new Ghost(1,1,0,0);
         Pacman pacman = new Pacman(1,1,0,0);
         DatabaseReference mDatabase = Utils.getFireBaseDataBase();
-//        mDatabase.child("users").child(mUserId).child("player").child("level").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("player").child("experience").setValue(1);
         String mUserId = FirebaseAuth.getInstance().getUid();
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.level)).setValue(pacman.getLevel());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.experience)).setValue(pacman.getExperience());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.xPos)).setValue(pacman.getxPos());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.yPos)).setValue(pacman.getyPos());
 
-//        mDatabase.child("users").child(mUserId).child("pacman").child("skills").child("skill_1").child("level").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("pacman").child("skills").child("skill_1").child("experience").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("pacman").child("skills").child("skill_2").child("level").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("pacman").child("skills").child("skill_2").child("experience").setValue(1);
-
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.level)).setValue(ghost.getLevel());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.experience)).setValue(ghost.getExperience());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.xPos)).setValue(ghost.getxPos());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.yPos)).setValue(ghost.getyPos());
-//        mDatabase.child("users").child(mUserId).child("ghost").child("skills").child("skill_1").child("level").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("ghost").child("skills").child("skill_1").child("experience").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("ghost").child("skills").child("skill_2").child("level").setValue(1);
-//        mDatabase.child("users").child(mUserId).child("ghost").child("skills").child("skill_2").child("experience").setValue(1);
 
     }
 
