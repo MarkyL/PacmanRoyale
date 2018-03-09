@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.mark.pacmanroyale">
-    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <meta-data
+        android:name="com.facebook.sdk.ApplicationId"
+        android:value="@string/facebook_application_id" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/AppTheme">
+        android:theme="@style/AppTheme.NoActionBar" >
 
         <activity
             android:name=".Activities.MainActivity"
@@ -16,20 +22,15 @@
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
-
-
-    <activity
-        android:name=".Activities.PlayActivity"
-        android:theme="@style/Theme.AppCompat.Light.NoActionBar.FullScreen" />
-    <activity android:name=".Activities.LogInActivity" />
-    <activity android:name=".Activities.SignUpActivity" />
+        <activity
+            android:name=".Activities.PlayActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".Activities.LogInActivity" />
+        <activity android:name=".Activities.SignUpActivity" />
     </application>
 
-    <meta-data
-        android:name="com.facebook.sdk.ApplicationId"
-        android:value="@string/facebook_application_id"/>
 </manifest>

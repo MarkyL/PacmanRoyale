@@ -232,7 +232,7 @@ public class WaitingRoom {
 //                    }
                     gameRoom = new VirtualGameRoom(userID, enemyID, false);
                     Utils.setVirtualGameRoom(gameRoom);
-                    Toast.makeText(context, "INVITED =me as "+userID+" enemy as "+enemyID, Toast.LENGTH_SHORT).show();
+                    //Toast.makeText(context, "INVITED =me as "+userID+" enemy as "+enemyID, Toast.LENGTH_SHORT).show();
 
                 String virtualRoomID = enemyID + "+" + userID;
                 Log.d(TAG, "ghost sets his virtualRoomID params to = " + virtualRoomID);

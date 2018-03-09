@@ -105,8 +105,8 @@ public class MainActivity extends AppCompatActivity {
 
         printHashKey(this);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        //setSupportActionBar(toolbar);
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
@@ -310,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
         public void printHashKey(Context pContext) {
             try {
                 PackageInfo info = getPackageManager().getPackageInfo(getPackageName(), PackageManager.GET_SIGNATURES);
+                Log.d(TAG, "printHashKey: Im before loop" + info.toString());
                 for (Signature signature : info.signatures) {
                     MessageDigest md = MessageDigest.getInstance("SHA");
                     md.update(signature.toByteArray());

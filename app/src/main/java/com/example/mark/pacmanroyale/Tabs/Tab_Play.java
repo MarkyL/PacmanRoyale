@@ -1,6 +1,7 @@
 package com.example.mark.pacmanroyale.Tabs;
 
 import android.content.Intent;
+import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -47,6 +48,8 @@ public class Tab_Play extends Fragment implements View.OnClickListener {
             }
             break;
             case (R.id.playAsPacmanBtn): {
+                ImageView loaderImage = getActivity().findViewById(R.id.play_loader);
+                loaderImage.setVisibility(View.VISIBLE);
                 Utils.getWaitingRoom().beginMatchMaking(GameMode.PACMAN);
             } break;
             case (R.id.playAsGhostBtn): {
