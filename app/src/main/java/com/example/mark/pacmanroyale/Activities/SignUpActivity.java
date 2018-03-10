@@ -9,6 +9,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.Ghost;
@@ -48,7 +49,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View view) {
         switch (view.getId()) {
             case (R.id.signupButton): {
-                beginSignUp();
+                Toast.makeText(this, "Yet to be implemented!", Toast.LENGTH_SHORT).show();
+                //beginSignUp();
             } break;
         }
     }
@@ -93,6 +95,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                             }
                         }
                     });
+
         }
     }
 

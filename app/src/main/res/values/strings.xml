@@ -51,6 +51,10 @@
     <string name="experience">experience</string>
     <string name="xPos">xPos</string>
     <string name="yPos">yPos</string>
+    <string name="xPos2">xPos2</string>
+    <string name="yPos2">yPos2</string>
+    <string name="xPos3">xPos3</string>
+    <string name="yPos3">yPos3</string>
     <string name="user_presence">status</string>
     <string name="waiting_room">WaitingRoom</string>
     <string name="virtual_room">VirtualRoom</string>

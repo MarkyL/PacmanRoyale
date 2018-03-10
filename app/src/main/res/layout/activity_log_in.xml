@@ -40,22 +40,23 @@
         android:layout_below="@+id/passwordField"
         android:text="@string/login_button_label" />
 
-    <TextView
-        android:id="@+id/signUpText"
+
+    <Button
+        android:id="@+id/sign_up"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/loginButton"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="69dp"
-        android:text="@string/sign_up_text" />
+        android:layout_below="@id/loginButton"
+        android:layout_centerInParent="true"
+        android:layout_marginTop="25dp"
+        android:text="Sign up" />
 
     <com.facebook.login.widget.LoginButton
         android:id="@+id/facebook_signup_btn"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/signUpText"
+        android:layout_below="@id/sign_up"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="11dp"
+        android:layout_marginTop="25dp"
         android:gravity="center" />
 
     <com.google.android.gms.common.SignInButton
@@ -64,7 +65,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/facebook_signup_btn"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="28dp"
+        android:layout_marginTop="25dp"
         android:gravity="center" />
 
 

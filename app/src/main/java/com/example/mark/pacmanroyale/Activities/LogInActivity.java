@@ -9,7 +9,6 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.R;
@@ -41,16 +40,17 @@ import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DatabaseReference;
 
 
-public class LogInActivity extends AppCompatActivity implements View.OnClickListener{
+public class LogInActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final String TAG = "LogInActivity";
-    private static final int RC_SIGN_IN = 7 ;
+    private static final int RC_SIGN_IN = 7;
 
     protected EditText emailEditText;
     protected EditText passwordEditText;
     protected Button logInButton;
-    protected TextView signUpTextView;
+    protected Button signupButton;
     protected SignInButton signInButton;
+
 
     protected LoginButton facebookSignUp;
     private FirebaseAuth mFirebaseAuth;
@@ -83,10 +83,10 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     }
 
     private void initUI() {
-        signUpTextView = findViewById(R.id.signUpText);
         emailEditText = findViewById(R.id.emailField);
         passwordEditText = findViewById(R.id.passwordField);
         logInButton = findViewById(R.id.loginButton);
+        signupButton = findViewById(R.id.sign_up);
         facebookSignUp = findViewById(R.id.facebook_signup_btn);
         signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
@@ -95,9 +95,9 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     private void setOnClickListeners() {
         logInButton.setOnClickListener(this);
         facebookSignUp.setOnClickListener(this);
-        facebookSignUp.setReadPermissions("email","public_profile");
+        facebookSignUp.setReadPermissions("email", "public_profile");
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-        signUpTextView.setOnClickListener(this);
+        signupButton.setOnClickListener(this);
     }
 
 
@@ -144,14 +144,20 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         switch (view.getId()) {
             case (R.id.loginButton): {
                 initiateLoginAction();
-            } break;
+            }
+            break;
             case (R.id.facebook_signup_btn): {
                 facebookSignUp();
-            } break;
-            case(R.id.sign_in_button):{
+            }
+            break;
+            case (R.id.sign_in_button): {
                 googleSignIn();
                 break;
             }
+            case (R.id.sign_up): {
+                Intent intent = new Intent(this, SignUpActivity.class);
+                startActivity(intent);
+            } break;
         }
     }
 
@@ -203,14 +209,16 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
             @Override
             public void onSuccess(LoginResult loginResult) {
                 Toast.makeText(LogInActivity.this, "Logged in Successfully!", Toast.LENGTH_SHORT).show();
-                Log.d(TAG, "Login success, "+loginResult.getAccessToken().getUserId()+
+                Log.d(TAG, "Login success, " + loginResult.getAccessToken().getUserId() +
                         "\n" + loginResult.getAccessToken().getToken());
                 handleFacebookAccessToken(loginResult.getAccessToken());
             }
+
             @Override
             public void onCancel() {
                 Toast.makeText(LogInActivity.this, "Login cancelled", Toast.LENGTH_SHORT).show();
             }
+
             @Override
             public void onError(FacebookException error) {
                 Toast.makeText(LogInActivity.this, "Error facebook Signup", Toast.LENGTH_SHORT).show();
@@ -270,8 +278,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
     private void initUserDefaultData() {
 
-        Ghost ghost = new Ghost(1,1,0,0);
-        Pacman pacman = new Pacman(1,1,0,0);
+        Ghost ghost = new Ghost(1, 1, 0, 0);
+        Pacman pacman = new Pacman(1, 1, 0, 0);
         DatabaseReference mDatabase = Utils.getFireBaseDataBase();
         String mUserId = FirebaseAuth.getInstance().getUid();
         DatabaseReference userReference = mDatabase.child(getString(R.string.users_node)).child(mUserId);
