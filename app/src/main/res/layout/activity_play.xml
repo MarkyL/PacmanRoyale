@@ -26,16 +26,29 @@
         android:orientation="vertical"
         android:visibility="invisible">
 
-
     </LinearLayout>
 
-      <Button
-        android:id="@+id/button"
+    <Button
+        android:id="@+id/GoInvisible"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/middleSurface"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="40dp"
-        android:text="Button" />
+        android:layout_alignParentBottom="true"
+        android:layout_marginBottom="16dp"
+        android:layout_marginEnd="38dp"
+        android:onClick="goInvisible"
+        android:text="Go Invisible"
+        android:visibility="invisible" />
+
+    <TextView
+        android:id="@+id/invisibleTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignBottom="@+id/GoInvisible"
+        android:layout_alignStart="@+id/middleSurface"
+        android:layout_marginBottom="13dp"
+        android:layout_marginStart="113dp"
+        android:visibility="invisible"
+        android:text="Invisible Time" />
+
 
 </RelativeLayout>

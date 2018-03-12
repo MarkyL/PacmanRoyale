@@ -6,12 +6,12 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.AsyncTask;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.User.Pacman;
@@ -28,11 +28,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     private static final String TAG = "DrawingView";
     private static final int BLOCK_SIZE_DIVIDER = 17;
-    private static final int XYDelta = 5;
+    private static final int XYDelta = 45;
 
     private static final int GHOST1_SPEED = 20;
     private static final int GHOST2_SPEED = 30;
     private static final int GHOST3_SPEED = 40;
+    private static final int DEFAULT_VISIBILTY = 255 ;
 
     private Thread mThread;
     private SurfaceHolder surfaceHolder;
@@ -47,20 +48,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private Paint paint;
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
     private Bitmap[] arrowRight, arrowDown, arrowLeft, arrowUp;
-
-    private int currentControlledGhost = 1; // 1 is the default starting ghost.
-
-    private Bitmap ghost1Bitmap;
-    private Bitmap ghostBitmapSelected;
-    private Bitmap currentGhost1Bitmap;
-
+    private Bitmap ghostBitmap;
     private Bitmap ghost2Bitmap;
-    private Bitmap ghost2BitmapSelected;
-    private Bitmap currentGhost2Bitmap;
-
     private Bitmap ghost3Bitmap;
-    private Bitmap ghost3BitmapSelected;
-    private Bitmap currentGhost3Bitmap;
+
+    private int pacmanSpeed = 15;
+//    private int speedDelta;
+
+    private int visibility ;
 
     private int countPellets = 0;
     private boolean isFirstTimePellet = true;
@@ -89,7 +84,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     int yDistance;
 
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
-    //private int direction = 4;              // Direction of the swipe, initial direction is right
+    private int direction = 4;              // Direction of the swipe, initial direction is right
     private int nextDirection = 4;          // Buffer for the next direction you choose
     private int viewDirection = 2;          // Direction that pacman is facing
 
@@ -97,15 +92,16 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private int ghostDirection;
     private int ghost2Direction;
     private int ghost3Direction;
-    private int pacmanDirection = 4;
+
+    private boolean isGhost2Turn;
 
     private int screenWidth;                // Width of the phone screen
     private int blockSize;                  // Size of a block on the map
     private int enemyBlockSize;
     public static int LONG_PRESS_TIME = 750;  // Time in milliseconds
 
-    private int spriteSize;
-
+    public static int GHOST2_DELAY = 750;  // Time in milliseconds
+    public static int GHOST3_DELAY = 1250;  // Time in milliseconds
     private int currentScore = 0;           //Current game score
 
     final Handler handler = new Handler();
@@ -120,18 +116,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private int mEnemyPacmanDirection;
     private boolean isGhostDirectionChanged;
     private boolean isPacmanDirectionChanged;
-
     private int yPosPacmanForEnemy;
     private int xPosPacmanForEnemy;
-
     private int xPosGhostForEnemy;
     private int yPosGhostForEnemy;
-
-    private int xPosGhost2ForEnemy;
-    private int yPosGhost2ForEnemy;
-
-    private int xPosGhost3ForEnemy;
-    private int yPosGhost3ForEnemy;
 
     private boolean firstTime = true;
     private Iinterface myInterface;
@@ -148,30 +136,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         blockSize = screenWidth / BLOCK_SIZE_DIVIDER;
         blockSize = (blockSize / 5) * 5;
 
-        this.gameMode = gameMode;
-
-        initGhostStartingParams();
-
-        xPosPacman = 8 * blockSize;
-        yPosPacman = 13 * blockSize;
-
-        if (gameMode == GameMode.GHOST || gameMode == GameMode.PACMAN) {
-            virtualRoomReference = Utils.getVirtualRoomReference();
-            virtualRoomGhostReference = virtualRoomReference.child(getResources().getString(R.string.ghost_node));
-            virtualRoomPacmanReference = virtualRoomReference.child(getResources().getString(R.string.pacman_node));
-
-            if (gameMode == GameMode.PACMAN) {
-                listenToGhostPosOnFireBase();
-            } else if (gameMode == GameMode.GHOST) {
-                listenToPacmanPosOnFireBase();
-            }
-        }
-
-        loadBitmapImages();
-        myInterface = (Iinterface) context;
-    }
-
-    private void initGhostStartingParams() {
         xPosGhost = 8 * blockSize;
         yPosGhost = 4 * blockSize;
 
@@ -184,6 +148,54 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         ghostDirection = 4;
         ghost2Direction = 4;
         ghost3Direction = 4;
+
+        xPosPacman = 8 * blockSize;
+        yPosPacman = 13 * blockSize;
+
+        if (gameMode == GameMode.GHOST || gameMode == GameMode.PACMAN) {
+            virtualRoomReference = Utils.getVirtualRoomReference();
+            virtualRoomGhostReference = virtualRoomReference.child(getResources().getString(R.string.ghost_node));
+            virtualRoomPacmanReference = virtualRoomReference.child(getResources().getString(R.string.pacman_node));
+        }
+
+        this.gameMode = gameMode;
+        loadBitmapImages();
+        //loadGhostAndPacman();
+        if (gameMode == GameMode.PACMAN) {
+            listenToGhostPosOnFireBase();
+            goInvisible(DEFAULT_VISIBILTY);
+        } else if (gameMode == GameMode.GHOST) {
+            listenToPacmanPosOnFireBase();
+        }
+        else
+            goInvisible(DEFAULT_VISIBILTY);
+
+//        enemyBlockSize = Utils.getEnemyBlockSize();
+//        Log.d(TAG, "DrawingView: enemyBlockSize = " +enemyBlockSize);
+//        enemyBlockSize=84;
+//        initEnemyPosVariables();
+
+        //WaitForOpponentAsyncTask waitForOpponentAsyncTask = new WaitForOpponentAsyncTask();
+        Log.d(TAG, "test1 end of drawingView constructor ");
+
+        myInterface = (Iinterface) context;
+
+    }
+
+//    public void setPacmanSpeed(int speed) {
+//        this.pacmanSpeed = speed;
+//    }
+//
+//
+//    public void setSpeedDelta(int delta) {
+//        this.speedDelta = delta;
+//    }
+
+    public void goInvisible(int visibility){
+        this.visibility = visibility;
+        if(gameMode == GameMode.PACMAN)
+            virtualRoomPacmanReference.child(getResources().getString(R.string.invisible)).setValue(this.visibility);
+
     }
 
     //virtualRoomGhostReference
@@ -191,20 +203,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         virtualRoomGhostReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 if (dataSnapshot.hasChild(getResources().getString(R.string.xPos))
                         && dataSnapshot.hasChild(getResources().getString(R.string.yPos))) {
                     xPosGhost = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.xPos)).getValue().toString());
                     yPosGhost = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.yPos)).getValue().toString());
-                }
-                if (dataSnapshot.hasChild(getResources().getString(R.string.xPos2))
-                        && dataSnapshot.hasChild(getResources().getString(R.string.yPos2))) {
-                    xPosGhost2 = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.xPos2)).getValue().toString());
-                    yPosGhost2 = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.yPos2)).getValue().toString());
-                }
-                if (dataSnapshot.hasChild(getResources().getString(R.string.xPos3))
-                        && dataSnapshot.hasChild(getResources().getString(R.string.yPos3))) {
-                    xPosGhost3 = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.xPos3)).getValue().toString());
-                    yPosGhost3 = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.yPos3)).getValue().toString());
+                    Log.d(TAG, "onDataChange() x/y ghost = " + xPosGhost + "/" + yPosGhost);
                 }
             }
 
@@ -236,6 +240,15 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     viewDirectionEnemyPacman = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.pacmanDirection)).getValue().toString());
                     Log.d(TAG, "onDataChange: direction is: " + viewDirectionEnemyPacman);
                 }
+
+                if(dataSnapshot.hasChild(getResources().getString(R.string.invisible))){
+                    visibility = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.invisible)).getValue().toString());
+                }
+//                if (mPacman != null) {
+//                    xPosPacman = mPacman.getxPos();
+//                    yPosPacman = mPacman.getyPos();
+//                    Log.d(TAG, "onDataChange() just listened to the enemy pacman!");
+//                }
             }
 
             @Override
@@ -289,9 +302,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
             break;
             case (MotionEvent.ACTION_UP): {
-                if (gameMode == GameMode.GHOST) {
-                    isNewGhostSelected(event.getX(), event.getY());
-                }
                 x2 = event.getX();
                 y2 = event.getY();
                 calculateSwipeDirection();
@@ -301,121 +311,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
         return true;
     }
-
-    private void isNewGhostSelected(float x, float y) {
-        final int extraDelta = 10;
-        // see if ghost 1 was selected
-        if ((x + ghost1Bitmap.getWidth() + extraDelta >= xPosGhost && x - ghost1Bitmap.getWidth() - extraDelta <= xPosGhost)
-                && (y + ghost1Bitmap.getHeight() + extraDelta >= yPosGhost && y - ghost1Bitmap.getHeight() - extraDelta <= yPosGhost)) {
-            Toast.makeText(getContext(), "Ghost 1 selected!!!", Toast.LENGTH_SHORT).show();
-            currentControlledGhost = 1;
-            currentGhost1Bitmap = ghostBitmapSelected;
-            currentGhost2Bitmap = ghost2Bitmap;
-            currentGhost3Bitmap = ghost3Bitmap;
-        }
-        // see if ghost 2 was selected
-        if ((x + ghost2Bitmap.getWidth() + extraDelta >= xPosGhost2 && x - ghost2Bitmap.getWidth() - extraDelta <= xPosGhost2)
-                && (y + ghost2Bitmap.getHeight() + extraDelta >= yPosGhost2 && y - ghost2Bitmap.getHeight() - extraDelta <= yPosGhost2)) {
-            Toast.makeText(getContext(), "Ghost 2 selected!!!", Toast.LENGTH_SHORT).show();
-            currentControlledGhost = 2;
-            moveGhostToCenterOfABlock(2);
-            currentGhost1Bitmap = ghost1Bitmap;
-            currentGhost2Bitmap = ghost2BitmapSelected;
-            currentGhost3Bitmap = ghost3Bitmap;
-
-        }
-        // see if ghost 3 was selected
-        if ((x + ghost3Bitmap.getWidth() + extraDelta >= xPosGhost3 && x - ghost3Bitmap.getWidth() - extraDelta <= xPosGhost3)
-                && (y + ghost3Bitmap.getHeight() + extraDelta >= yPosGhost3 && y - ghost3Bitmap.getHeight() - extraDelta <= yPosGhost3)) {
-            Toast.makeText(getContext(), "Ghost 3 selected!!!", Toast.LENGTH_SHORT).show();
-            currentControlledGhost = 3;
-            currentGhost1Bitmap = ghost1Bitmap;
-            currentGhost2Bitmap = ghost2Bitmap;
-            currentGhost3Bitmap = ghost3BitmapSelected;
-        }
-    }
-
-    private void moveGhostToCenterOfABlock(int ghostNumber) {
-        // tests for ghost 2.
-        switch (ghostNumber) {
-            case 1: {
-                if (xPosGhost % blockSize == 0 && yPosGhost % blockSize == 0) {
-                    return; // it's ok.
-                }
-                switch (ghostDirection) {
-                    case 0: {
-                        // moving Up , y should be rounded up to closest blockSize
-                        yPosGhost -= blockSize % yPosGhost;
-                    } break;
-                    case 1: {
-                        // moving right , x should be rounded up to closest blockSize
-                        xPosGhost += blockSize % xPosGhost;
-                    } break;
-                    case 2: {
-                        // moving down , y should be floored to closest blockSize
-                        yPosGhost += blockSize % yPosGhost;
-                    } break;
-                    case 3: {
-                        // moving left , x should be floored to closest blockSize
-                        xPosGhost -= blockSize % xPosGhost;
-                    } break;
-                }
-            } break;
-            case 2: {
-                if (xPosGhost2 % blockSize == 0 && yPosGhost2 % blockSize == 0) {
-                    return; // it's ok.
-                }
-                switch (ghost2Direction) {
-                    case 0: {
-                        // moving Up , y should be rounded up to closest blockSize
-                        yPosGhost2 -= blockSize % yPosGhost2;
-                    } break;
-                    case 1: {
-                        // moving right , x should be rounded up to closest blockSize
-                        xPosGhost2 += blockSize % xPosGhost2;
-                    } break;
-                    case 2: {
-                        // moving down , y should be floored to closest blockSize
-                        yPosGhost2 += blockSize % yPosGhost2;
-                    } break;
-                    case 3: {
-                        // moving left , x should be floored to closest blockSize
-                        xPosGhost2 -= blockSize % xPosGhost2;
-                    } break;
-                }
-            } break;
-            case 3: {
-                if (xPosGhost3 % blockSize == 0 && yPosGhost3 % blockSize == 0) {
-                    return; // it's ok.
-                }
-                switch (ghost3Direction) {
-                    case 0: {
-                        // moving Up , y should be rounded up to closest blockSize
-                        yPosGhost3 -= blockSize % yPosGhost3;
-                    } break;
-                    case 1: {
-                        // moving right , x should be rounded up to closest blockSize
-                        xPosGhost3 += blockSize % xPosGhost3;
-                    } break;
-                    case 2: {
-                        // moving down , y should be floored to closest blockSize
-                        yPosGhost3 += blockSize % yPosGhost3;
-                    } break;
-                    case 3: {
-                        // moving left , x should be floored to closest blockSize
-                        xPosGhost3 -= blockSize % xPosGhost3;
-                    } break;
-                }
-            } break;
-        }
-    }
-
-    /*
-    if (x >= xOfYourBitmap && x < (xOfYourBitmap + yourBitmap.getWidth())
-                && y >= yOfYourBitmap && y < (yOfYourBitmap + yourBitmap.getHeight())) {
-            //tada, if this is true, you've started your click inside your bitmap
-        }
-     */
 
     // Calculates which direction the user swipes
     // based on calculating the differences in
@@ -453,7 +348,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public void run() {
         Log.d(TAG, "run method starts");
         while (canDraw) {
-            Log.d(TAG, "run: canDraw= true");
             if (!surfaceHolder.getSurface().isValid()) {
                 continue; // need to check what it does - and why/do we need it.
             }
@@ -462,13 +356,20 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 //                Log.d(TAG, "run: Game Over!");
 //                canDraw = false;
 //            }
+            // Log.d(TAG, "run: Pacman X = " + xPosPacman +" Pacman Y = "+yPosPacman +" Ghost X = "+xPosGhost +" Ghost Y = "+yPosGhost);
 
-//            boolean xCatched = xPosPacman <= xPosGhost+XYDelta && xPosPacman >= xPosGhost-XYDelta;
-//            boolean yCatched = yPosPacman <= yPosGhost+XYDelta && yPosPacman >= yPosGhost-XYDelta;
-//            if(gameMode == GameMode.VS_PC && xCatched && yCatched){
-//                Log.d(TAG, "run: Game Over!");
-//                canDraw = false;
-//            }
+            boolean xGhostCatched = (xPosPacman <= xPosGhost + XYDelta && xPosPacman >= xPosGhost - XYDelta);
+            boolean xGhost2Catched = (xPosPacman <= xPosGhost2 + XYDelta && xPosPacman >= xPosGhost2 - XYDelta);
+            boolean xGhost3Catched = (xPosPacman <= xPosGhost3 + XYDelta && xPosPacman >= xPosGhost3 - XYDelta);
+
+            boolean yGhostCatched = (yPosPacman <= yPosGhost + XYDelta && yPosPacman >= yPosGhost - XYDelta);
+            boolean yGhost2Catched = (yPosPacman <= yPosGhost2 + XYDelta && yPosPacman >= yPosGhost2 - XYDelta);
+            boolean yGhost3Catched = (yPosPacman <= yPosGhost3 + XYDelta && yPosPacman >= yPosGhost3 - XYDelta);
+
+            if (((xGhostCatched && yGhostCatched) || (xGhost2Catched && yGhost2Catched) || (xGhost3Catched && yGhost3Catched)) && (visibility == DEFAULT_VISIBILTY)) {
+                Log.d(TAG, "run: Game Over!");
+                //canDraw = false;
+            }
 
             if (enemyBlockSize == 0) {
                 enemyBlockSize = Utils.getEnemyBlockSize();
@@ -485,30 +386,31 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
                 if (gameMode == GameMode.PACMAN || gameMode == GameMode.GHOST) {
                     if (gameMode == GameMode.PACMAN) {
-                        moveCharacter(xPosPacman, yPosPacman, pacmanDirection);
+                        moveCharacter(xPosPacman, yPosPacman, gameMode);
                     } else {
-                        switch (currentControlledGhost) {
-                            case 1: {
-                                moveCharacter(xPosGhost, yPosGhost, ghostDirection);
-                            }
-                            break;
-                            case 2: {
-                                moveCharacter(xPosGhost2, yPosGhost2, ghost2Direction);
-                            }
-                            break;
-                            case 3: {
-                                moveCharacter(xPosGhost3, yPosGhost3, ghost3Direction);
-                            }
-                            break;
-                        }
+                        moveCharacter(xPosGhost, yPosGhost, gameMode);
                     }
                 } else {
-                    moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, currentGhost1Bitmap);
-                    moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, currentGhost2Bitmap);
-                    moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, currentGhost3Bitmap);
+                    moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, ghostBitmap);
+
+                    moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, ghost2Bitmap);
+
+                    moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, ghost3Bitmap);
+                    //if (isGhost2Turn) {
+                    //canvas.drawBitmap(ghost3Bitmap, xPosGhost3, yPosGhost3, paint);
+                    // isGhost2Turn = false;
+                    // } else {
+                    //  canvas.drawBitmap(ghost2Bitmap, xPosGhost2, yPosGhost2, paint);
+                    //  isGhost2Turn = true;
+                    // }
+
+
+//                moveGhostWithAD(ghost2Bitmap, xPosGhost2, yPosGhost2, 2);
+//                moveGhostWithAD(ghost3Bitmap, xPosGhost3, yPosGhost3, 3);
                     // Moves the pacman based on his direction
                     movePacman();
                 }
+
 
                 // Draw the pellets
                 if (gameMode != GameMode.GHOST) {
@@ -523,6 +425,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     firstTime = false;
                     myInterface.setVisibilities();
                 }
+                //Log.d(TAG, "run: user utils ghostX="+Utils.getUserInformation().getGhost().getxPos());
             }
         }
     }
@@ -531,25 +434,48 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         void setVisibilities();
     }
 
+//    public void initGhostPositions() {
+//        virtualRoomGhostReference.child("blocksize").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                enemyBlockSize = Integer.parseInt(dataSnapshot.getValue().toString());
+//                initEnemyPosVariables();
+//            }
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {}
+//        });
+//    }
+//
+//    public void setEnemyBlockSizeAndInitPacmanPositions() {
+//        virtualRoomPacmanReference.child("blocksize").addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                enemyBlockSize = Integer.parseInt(dataSnapshot.getValue().toString());
+//                initEnemyPosVariables();
+//            }
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {}
+//        });
+//    }
+
     public void initEnemyPosVariables() {
         Log.d(TAG, "initEnemyPosVariables() starting...");
+        //
         if (gameMode == GameMode.GHOST) {
             if (xPosGhostForEnemy == 0 || yPosGhostForEnemy == 0) {
                 xPosGhostForEnemy = 8 * enemyBlockSize;
                 yPosGhostForEnemy = 4 * enemyBlockSize;
-            }
-            if (xPosGhost2ForEnemy == 0 || yPosGhost2ForEnemy == 0) {
-                xPosGhost2ForEnemy = 1 * enemyBlockSize;
-                yPosGhost2ForEnemy = 2 * enemyBlockSize;
-            }
-            if (xPosGhost3ForEnemy == 0 || yPosGhost3ForEnemy == 0) {
-                xPosGhost3ForEnemy = 16 * enemyBlockSize;
-                yPosGhost3ForEnemy = 2 * enemyBlockSize;
+                //Utils.getUserInformation().getGhost().setxPos(xPosGhostForEnemy);
+                //Utils.getUserInformation().getGhost().setyPos(yPosGhostForEnemy);
+                Log.d(TAG, "initEnemyPosVariables: starting ghost values x= " + xPosGhostForEnemy + " y= " + yPosGhostForEnemy);
             }
         } else if (gameMode == GameMode.PACMAN) { // enemy = pacman
             if (xPosPacmanForEnemy == 0 || yPosPacmanForEnemy == 0) {
                 xPosPacmanForEnemy = 8 * enemyBlockSize;
                 yPosPacmanForEnemy = 13 * enemyBlockSize;
+                //Utils.getUserInformation().getPacman().setxPos(xPosPacmanForEnemy);
+                //Utils.getUserInformation().getPacman().setyPos(yPosPacmanForEnemy);
+                Log.d(TAG, "initEnemyPosVariables: starting pacman values x= " + xPosPacmanForEnemy + " y= " + yPosPacmanForEnemy);
             }
         }
         updatePositionsToDB();
@@ -569,19 +495,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         } else if (gameMode == GameMode.GHOST) {
             //virtualRoomGhostReference.child("direction").setValue(direction);
             Log.d(TAG, "updatePositionsToDB: update enemy ghost x=" + xPosGhostForEnemy + " y=" + yPosGhostForEnemy);
-            //if (xPosGhostForEnemy != 0 && yPosGhostForEnemy != 0) {
-            // Ghost #1
-            virtualRoomGhostReference.child(getResources().getString(R.string.xPos)).setValue(xPosGhostForEnemy);
-            virtualRoomGhostReference.child(getResources().getString(R.string.yPos)).setValue(yPosGhostForEnemy);
-
-            // Ghost #2
-            virtualRoomGhostReference.child(getResources().getString(R.string.xPos2)).setValue(xPosGhost2ForEnemy);
-            virtualRoomGhostReference.child(getResources().getString(R.string.yPos2)).setValue(yPosGhost2ForEnemy);
-
-            // Ghost #2
-            virtualRoomGhostReference.child(getResources().getString(R.string.xPos3)).setValue(xPosGhost3ForEnemy);
-            virtualRoomGhostReference.child(getResources().getString(R.string.yPos3)).setValue(yPosGhost3ForEnemy);
-
+            if (xPosGhostForEnemy != 0 && yPosGhostForEnemy != 0) {
+                virtualRoomGhostReference.child(getResources().getString(R.string.xPos)).setValue(xPosGhostForEnemy);
+                virtualRoomGhostReference.child(getResources().getString(R.string.yPos)).setValue(yPosGhostForEnemy);
+            }
+            //virtualRoomGhostReference.child(getResources().getString(R.string.xPos)).setValue(Utils.getUserInformation().getGhost().getxPos());
+            //virtualRoomGhostReference.child(getResources().getString(R.string.yPos)).setValue(Utils.getUserInformation().getGhost().getyPos());
         }
     }
 
@@ -606,7 +525,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     }
 
     // Updates the character sprite and handles collisions
-    public void moveCharacter(int charXPos, int charYPos, int direction) {
+    public void moveCharacter(int charXPos, int charYPos, GameMode isPacman) {
         short ch;
 
         // Check if xPos and yPos of pacman is both a multiple of block size
@@ -615,12 +534,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             // When pacman goes through tunnel on
             // the right reappear at left tunnel
             if (charXPos >= blockSize * 17) {
+                charXPos = 0;
                 if (gameMode == GameMode.PACMAN) {
-                    charXPos = 0;
                     xPosPacmanForEnemy = 0;
-                } else { // game mode is ghost.
-                    charXPos = blockSize * 16;
-                    direction = 3;
+                } else {
+                    xPosGhostForEnemy = 0;
                 }
             }
 
@@ -648,6 +566,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
 
             if (gameMode == GameMode.PACMAN && direction != 4) {
+
                 virtualRoomPacmanReference.child(getContext().getString(R.string.pacmanDirection)).setValue(direction);
             }
 
@@ -658,189 +577,86 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     (direction == 2 && (ch & 8) != 0)) {
                 direction = 4;
             }
+
         }
 
+        // When pacman goes through tunnel on
+        // the left reappear at right tunnel
         if (charXPos < 0) {
-            // When pacman goes through tunnel on
-            // the left reappear at right tunnel
+            charXPos = blockSize * 17;
             if (gameMode == GameMode.PACMAN) {
-                charXPos = blockSize * 17;
                 xPosPacmanForEnemy = enemyBlockSize * 17;
-            } else { // ghost remains in same spot
-                charXPos = blockSize * 1;
-                //direction = 1;
+            } else {
+                xPosGhostForEnemy = enemyBlockSize * 17;
             }
         }
 
-        if (gameMode == GameMode.PACMAN) {
+
+        if (isPacman == GameMode.PACMAN) {
             xPosPacman = charXPos;
             yPosPacman = charYPos;
-            pacmanDirection = direction;
-
-            canvas.drawBitmap(ghost1Bitmap, xPosGhost, yPosGhost, paint);
-            canvas.drawBitmap(ghost2Bitmap, xPosGhost2, yPosGhost2, paint);
-            canvas.drawBitmap(ghost3Bitmap, xPosGhost3, yPosGhost3, paint);
-
-            if (enemyBlockSize != 0) {
-                updatePacmanPositions();
-            }
-
+//            Log.d(TAG, "moveCharacter: xpospacman="+xPosPacman +"xpospacmanForEnemy="+xPosPacmanForEnemy);
+//            Log.d(TAG, "moveCharacter: ypospacman="+yPosPacman +"ypospacmanForEnemy="+yPosPacmanForEnemy);
             drawPacman();
+//            setEnemyGhostDirection();
+//            if (isGhostDirectionChanged) {
+//                determineEnemyGhostXY(mEnemyGhostDirection);
+//            }
+            canvas.drawBitmap(ghostBitmap, xPosGhost, yPosGhost, paint);
 
         } else {
-            // i'll update my direction - so the enemy can draw me on the right position as well.
+            // i'll update my direction - so the enemy can draw me on the right position aswell.
+            //virtualRoomGhostReference.child("direction").setValue(direction);
+
+            xPosGhost = charXPos;
+            yPosGhost = charYPos;
+
+//            setEnemyPacmanDirection();
+//            if (isPacmanDirectionChanged) {
+//                determineEnemyPacmanXY(mEnemyPacmanDirection);
+//            }
+            canvas.drawBitmap(ghostBitmap, charXPos, charYPos, paint);
             drawPacman();
-            updateRelevantGhostPositions(charXPos, charYPos, direction);
-            drawRelevantGhostBitmap();
-            moveUncontrolledGhostsWithAI();
-            if (enemyBlockSize != 0) {
-                updateControlledGhostPosition();
-            }
-        }
-    }
 
-    private void updateControlledGhostPosition() {
-        switch (currentControlledGhost) {
-            case 1: {
-                if (ghostDirection == 0) {
-                    yPosGhost += -blockSize / GHOST1_SPEED;
-                    yPosGhostForEnemy += -enemyBlockSize / GHOST1_SPEED;
-                } else if (ghostDirection == 1) {
-                    xPosGhost += blockSize / GHOST1_SPEED;
-                    xPosGhostForEnemy += enemyBlockSize / GHOST1_SPEED;
-                } else if (ghostDirection == 2) {
-                    yPosGhost += blockSize / GHOST1_SPEED;
-                    yPosGhostForEnemy += enemyBlockSize / GHOST1_SPEED;
-                } else if (ghostDirection == 3) {
-                    xPosGhost += -blockSize / GHOST1_SPEED;
-                    xPosGhostForEnemy += -enemyBlockSize / GHOST1_SPEED;
-                }
-            } break;
-            case 2: {
-                if (ghost2Direction == 0) {
-                    yPosGhost2 += -blockSize / GHOST2_SPEED;
-                    yPosGhost2ForEnemy += -enemyBlockSize / GHOST2_SPEED;
-                } else if (ghost2Direction == 1) {
-                    xPosGhost2 += blockSize / GHOST2_SPEED;
-                    xPosGhost2ForEnemy += enemyBlockSize / GHOST2_SPEED;
-                } else if (ghost2Direction == 2) {
-                    yPosGhost2 += blockSize / GHOST2_SPEED;
-                    yPosGhost2ForEnemy += enemyBlockSize / GHOST2_SPEED;
-                } else if (ghost2Direction == 3) {
-                    xPosGhost2 += -blockSize / GHOST2_SPEED;
-                    xPosGhost2ForEnemy += -enemyBlockSize / GHOST2_SPEED;
-                }
-            } break;
-            case 3: {
-                if (ghost3Direction == 0) {
-                    yPosGhost3 += -blockSize / GHOST3_SPEED;
-                    yPosGhost3ForEnemy += -enemyBlockSize / GHOST3_SPEED;
-                } else if (ghost3Direction == 1) {
-                    xPosGhost3 += blockSize / GHOST3_SPEED;
-                    xPosGhost3ForEnemy += enemyBlockSize / GHOST3_SPEED;
-                } else if (ghost3Direction == 2) {
-                    yPosGhost3 += blockSize / GHOST3_SPEED;
-                    yPosGhost3ForEnemy += enemyBlockSize / GHOST3_SPEED;
-                } else if (ghost3Direction == 3) {
-                    xPosGhost3 += -blockSize / GHOST3_SPEED;
-                    xPosGhost3ForEnemy += -enemyBlockSize / GHOST3_SPEED;
-                }
-            } break;
         }
-        updatePositionsToDB();
-    }
-
-    private void updatePacmanPositions() {
-        if (pacmanDirection == 0) {
-            yPosPacman += -blockSize / 15;
-            yPosPacmanForEnemy += -enemyBlockSize / 15;
-        } else if (pacmanDirection == 1) {
-            xPosPacman += blockSize / 15;
-            xPosPacmanForEnemy += enemyBlockSize / 15;
-        } else if (pacmanDirection == 2) {
-            yPosPacman += blockSize / 15;
-            yPosPacmanForEnemy += enemyBlockSize / 15;
-        } else if (pacmanDirection == 3) {
-            xPosPacman += -blockSize / 15;
-            xPosPacmanForEnemy += -enemyBlockSize / 15;
-        }
-        updatePositionsToDB();
-    }
-
-    private void moveUncontrolledGhostsWithAI() {
-        switch (currentControlledGhost) {
-            case 1: { // I control ghost #1 , need to move with AI ghosts #2 & #3
-                moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, currentGhost2Bitmap);
-                moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, currentGhost3Bitmap);
-            }
-            break;
-            case 2: { // I control ghost #2 , need to move with AI ghosts #1 & #3
-                moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, currentGhost1Bitmap);
-                moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, currentGhost3Bitmap);
-            }
-            break;
-            case 3: { // I control ghost #3 , need to move with AI ghosts #1 & #2
-                moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, currentGhost1Bitmap);
-                moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, currentGhost2Bitmap);
-            }
-            break;
-        }
-    }
-
-    private void drawRelevantGhostBitmap() {
-        switch (currentControlledGhost) {
-            case 1: {
-                canvas.drawBitmap(currentGhost1Bitmap, xPosGhost, yPosGhost, paint);
-            }
-            break;
-            case 2: {
-                canvas.drawBitmap(currentGhost2Bitmap, xPosGhost2, yPosGhost2, paint);
-            }
-            break;
-            case 3: {
-                canvas.drawBitmap(currentGhost3Bitmap, xPosGhost3, yPosGhost3, paint);
-            }
-            break;
-        }
-    }
-
-    private void updateRelevantGhostPositions(int charXPos, int charYPos, int relevantGhostDirection) {
-        switch (currentControlledGhost) {
-            case 1: {
-                xPosGhost = charXPos;
-                yPosGhost = charYPos;
-                ghostDirection = relevantGhostDirection;
-            }
-            break;
-            case 2: {
-                xPosGhost2 = charXPos;
-                yPosGhost2 = charYPos;
-                ghost2Direction = relevantGhostDirection;
-            }
-            break;
-            case 3: {
-                xPosGhost3 = charXPos;
-                yPosGhost3 = charYPos;
-                ghost3Direction = relevantGhostDirection;
-            }
-            break;
-        }
-        /*
-        updateControlledGhostPosition();
+        // Depending on the direction move the position of pacman
+        if (isPacman == GameMode.PACMAN && enemyBlockSize != 0) {
+            Log.d(TAG, "moveCharacter enemyblock size = " + enemyBlockSize);
             if (direction == 0) {
-                yPosGhost += -blockSize / 15;
-                yPosGhostForEnemy += -enemyBlockSize / 15;
+                Log.d(TAG, "moveCharacter: direction = 0");
+                yPosPacman += -blockSize / pacmanSpeed;
+                yPosPacmanForEnemy += -enemyBlockSize / pacmanSpeed;
             } else if (direction == 1) {
-                xPosGhost += blockSize / 15;
-                xPosGhostForEnemy += enemyBlockSize / 15;
+                Log.d(TAG, "moveCharacter: direction = 1");
+                xPosPacman += blockSize / pacmanSpeed;
+                xPosPacmanForEnemy += enemyBlockSize / pacmanSpeed;
             } else if (direction == 2) {
-                yPosGhost += blockSize / 15;
-                yPosGhostForEnemy += enemyBlockSize / 15;
+                Log.d(TAG, "moveCharacter: direction = 2");
+                yPosPacman += blockSize / pacmanSpeed;
+                yPosPacmanForEnemy += enemyBlockSize / pacmanSpeed;
             } else if (direction == 3) {
-                xPosGhost += -blockSize / 15;
-                xPosGhostForEnemy += -enemyBlockSize / 15;
+                Log.d(TAG, "moveCharacter: direction = 3");
+                xPosPacman += -blockSize / pacmanSpeed;
+                xPosPacmanForEnemy += -enemyBlockSize / pacmanSpeed;
             }
-         */
+        } else if (isPacman == GameMode.GHOST && enemyBlockSize != 0) {
+            Log.d(TAG, "moveCharacter enemyblock size = " + enemyBlockSize);
+            if (direction == 0) {
+                yPosGhost += -blockSize / pacmanSpeed;
+                yPosGhostForEnemy += -enemyBlockSize / pacmanSpeed;
+            } else if (direction == 1) {
+                xPosGhost += blockSize / pacmanSpeed;
+                xPosGhostForEnemy += enemyBlockSize / pacmanSpeed;
+            } else if (direction == 2) {
+                yPosGhost += blockSize / pacmanSpeed;
+                yPosGhostForEnemy += enemyBlockSize / pacmanSpeed;
+            } else if (direction == 3) {
+                xPosGhost += -blockSize / pacmanSpeed;
+                xPosGhostForEnemy += -enemyBlockSize / pacmanSpeed;
+            }
+        }
+
+
     }
 
     // Updates the character sprite and handles collisions
@@ -858,7 +674,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
             // Is used to find the number in the level array in order to
             // check wall placement, pellet placement, and candy placement
+
             ch = leveldata1[yPosPacman / blockSize][xPosPacman / blockSize];
+
+
+            Log.d(TAG, "movePacman: i = " +(yPosPacman / blockSize) +" j =" +xPosPacman / blockSize);
+
 
             // If there is a pellet, eat it
             if ((ch & 16) != 0) {
@@ -876,15 +697,16 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     (nextDirection == 1 && (ch & 4) != 0) ||
                     (nextDirection == 0 && (ch & 2) != 0) ||
                     (nextDirection == 2 && (ch & 8) != 0))) {
-                viewDirection = pacmanDirection = nextDirection;
+                viewDirection = direction = nextDirection;
             }
 
             // Checks for wall collisions
-            if ((pacmanDirection == 3 && (ch & 1) != 0) ||
-                    (pacmanDirection == 1 && (ch & 4) != 0) ||
-                    (pacmanDirection == 0 && (ch & 2) != 0) ||
-                    (pacmanDirection == 2 && (ch & 8) != 0)) {
-                pacmanDirection = 4;
+            if ((direction == 3 && (ch & 1) != 0) ||
+                    (direction == 1 && (ch & 4) != 0) ||
+                    (direction == 0 && (ch & 2) != 0) ||
+                    (direction == 2 && (ch & 8) != 0)) {
+                direction = 4;
+                Log.d(TAG, "movePacman: direction = 4");
             }
         }
 
@@ -897,27 +719,27 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         drawPacman();
 
         // Depending on the direction move the position of pacman
-        if (pacmanDirection == 0) {
-            yPosPacman += -blockSize / 15;
-        } else if (pacmanDirection == 1) {
-            xPosPacman += blockSize / 15;
-        } else if (pacmanDirection == 2) {
-            yPosPacman += blockSize / 15;
-        } else if (pacmanDirection == 3) {
-            xPosPacman += -blockSize / 15;
-        }
-
+            if (direction == 0) {
+                yPosPacman += -blockSize / pacmanSpeed;
+            } else if (direction == 1) {
+                xPosPacman += blockSize / pacmanSpeed;
+            } else if (direction == 2) {
+                yPosPacman += blockSize / pacmanSpeed;
+            } else if (direction == 3) {
+                xPosPacman += -blockSize / pacmanSpeed;
+            }
     }
 
     // Method that draws pacman based on his viewDirection
     public void drawPacman() {
-        int test;
+        int theView;
         if (gameMode == GameMode.GHOST) {
-            test = viewDirectionEnemyPacman;
+            theView = viewDirectionEnemyPacman;
         } else {
-            test = viewDirection;
+            theView = viewDirection;
         }
-        switch (test) {
+        paint.setAlpha(visibility);
+        switch (theView) {
             case (0):
                 canvas.drawBitmap(pacmanUp[currentPacmanFrame], xPosPacman, yPosPacman, paint);
                 break;
@@ -931,6 +753,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 canvas.drawBitmap(pacmanDown[currentPacmanFrame], xPosPacman, yPosPacman, paint);
                 break;
         }
+        paint.setAlpha(DEFAULT_VISIBILTY);
     }
 
     private void moveGhostWithAI(int xPos, int yPos, int currentGhostDirection, final int ghostSpeed, int ghostNumber, Bitmap ghostResource) {
@@ -1013,92 +836,36 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
 
-        updateAIGhostPositions(xPos, yPos, currentGhostDirection, ghostSpeed, ghostNumber);
-
-//        switch (ghostNumber) {
-//            case 1: {
-//                xPosGhost = xPos;
-//                yPosGhost = yPos;
-//                ghostDirection = currentGhostDirection;
-//            }
-//            break;
-//            case 2: {
-//                xPosGhost2 = xPos;
-//                yPosGhost2 = yPos;
-//                ghost2Direction = currentGhostDirection;
-//            }
-//            break;
-//            case 3: {
-//                xPosGhost3 = xPos;
-//                yPosGhost3 = yPos;
-//                ghost3Direction = currentGhostDirection;
-//            }
-//            break;
-//        }
-        canvas.drawBitmap(ghostResource, xPos, yPos, paint);
-
-    }
-
-    private void updateAIGhostPositions(int xPos, int yPos, int currentGhostDirection, int ghostSpeed, int ghostNumber) {
-        int distanceTraveled = blockSize / ghostSpeed;
-        int distanceTraveledForEnemy = enemyBlockSize / ghostSpeed;
+        if (currentGhostDirection == 0) {
+            yPos += -blockSize / ghostSpeed;
+        } else if (currentGhostDirection == 1) {
+            xPos += blockSize / ghostSpeed;
+        } else if (currentGhostDirection == 2) {
+            yPos += blockSize / ghostSpeed;
+        } else if (currentGhostDirection == 3) {
+            xPos += -blockSize / ghostSpeed;
+        }
         switch (ghostNumber) {
             case 1: {
-                if (currentGhostDirection == 0) {
-                    yPos += -distanceTraveled;
-                    yPosGhostForEnemy += -distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 1) {
-                    xPos += distanceTraveled;
-                    xPosGhostForEnemy += distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 2) {
-                    yPos += distanceTraveled;
-                    yPosGhostForEnemy += distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 3) {
-                    xPos += -distanceTraveled;
-                    xPosGhostForEnemy += -distanceTraveledForEnemy;
-                }
                 xPosGhost = xPos;
                 yPosGhost = yPos;
                 ghostDirection = currentGhostDirection;
-            } break;
+            }
+            break;
             case 2: {
-                if (currentGhostDirection == 0) {
-                    yPos += -distanceTraveled;
-                    yPosGhost2ForEnemy += -distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 1) {
-                    xPos += distanceTraveled;
-                    xPosGhost2ForEnemy += distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 2) {
-                    yPos += distanceTraveled;
-                    yPosGhost2ForEnemy += distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 3) {
-                    xPos += -distanceTraveled;
-                    xPosGhost2ForEnemy += -distanceTraveledForEnemy;
-                }
                 xPosGhost2 = xPos;
                 yPosGhost2 = yPos;
                 ghost2Direction = currentGhostDirection;
-            } break;
+            }
+            break;
             case 3: {
-                if (currentGhostDirection == 0) {
-                    yPos += -distanceTraveled;
-                    yPosGhost3ForEnemy += -distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 1) {
-                    xPos += distanceTraveled;
-                    xPosGhost3ForEnemy += distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 2) {
-                    yPos += distanceTraveled;
-                    yPosGhost3ForEnemy += distanceTraveledForEnemy;
-                } else if (currentGhostDirection == 3) {
-                    xPos += -distanceTraveled;
-                    xPosGhost3ForEnemy += -distanceTraveledForEnemy;
-                }
                 xPosGhost3 = xPos;
                 yPosGhost3 = yPos;
                 ghost3Direction = currentGhostDirection;
             }
+            break;
         }
-        updatePositionsToDB();
+        canvas.drawBitmap(ghostResource, xPos, yPos, paint);
 
     }
 
@@ -1138,6 +905,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     (ghostDirection == 2 && (ch & 8) != 0)) {
                 ghostDirection = 4;
             }
+
         }
 
         if (ghostDirection == 0) {
@@ -1209,7 +977,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     private void loadBitmapImages() {
         // Scales the sprites based on screen
-        spriteSize = screenWidth / 17;        // Size of Pacman & Ghost
+        int spriteSize = screenWidth / 17;        // Size of Pacman & Ghost
         spriteSize = (spriteSize / 5) * 5;      // Keep it a multiple of 5
         int arrowSize = 7 * blockSize;            // Size of arrow indicators
 
@@ -1223,6 +991,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 getResources(), R.drawable.pacman_right3), spriteSize, spriteSize, false);
         pacmanRight[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_right), spriteSize, spriteSize, false);
+
 
         // Add bitmap images of pacman facing left
         pacmanLeft = new Bitmap[totalFrame];
@@ -1257,23 +1026,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         pacmanDown[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_down), spriteSize, spriteSize, false);
 
-        ghost1Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        ghostBitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost), spriteSize, spriteSize, false);
-        ghostBitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.ghost1_red), spriteSize, spriteSize, false);
-        currentGhost1Bitmap = ghostBitmapSelected;
 
         ghost2Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost2), spriteSize, spriteSize, false);
-        currentGhost2Bitmap = ghost2Bitmap;
-        ghost2BitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.ghost2_red), spriteSize, spriteSize, false);
 
         ghost3Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost3), spriteSize, spriteSize, false);
-        currentGhost3Bitmap = ghost3Bitmap;
-        ghost3BitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
-                getResources(), R.drawable.ghost3_red), spriteSize, spriteSize, false);
 
         Log.d(TAG, "loadBitmapImages: finished loading bitmap images");
     }
@@ -1299,4 +1059,39 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             {25, 26, 26, 26, 26, 26, 26, 24, 26, 24, 26, 26, 26, 26, 26, 26, 28},
     };
 
+    private class WaitForOpponentAsyncTask extends AsyncTask<Void, Integer, String> {
+        private ValueEventListener valueEventListener;
+
+        public WaitForOpponentAsyncTask() {
+
+        }
+
+        @Override
+        protected String doInBackground(Void... voids) {
+            while (enemyBlockSize == 0) {
+                if (gameMode == GameMode.PACMAN) { // need to listen to ghost path
+                    valueEventListener = virtualRoomGhostReference.addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.hasChild("blocksize")) {
+                                //enemyBlockSize =
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+
+            return "test";
+        }
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+        }
+    }
 }

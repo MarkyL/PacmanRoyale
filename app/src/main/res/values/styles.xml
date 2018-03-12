@@ -36,4 +36,13 @@
 
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light" />
 
+
+    <style name="MyTheme" parent="android:Theme.Holo.Light">
+        <item name="android:actionBarTabStyle">@style/MyTheme.ActionBar.TabView</item>
+    </style>
+
+    <style name="MyTheme.ActionBar.TabView" parent="android:style/Widget.Holo.ActionBar.TabView">
+        <item name="android:background">@drawable/tab_bar_background</item>
+    </style>
+
 </resources>

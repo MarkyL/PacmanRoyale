@@ -78,6 +78,8 @@
     <string name="blockSize">blocksize</string>
     <string name="screenWidth">screenwidth</string>
     <string name="pacmanDirection">direction</string>
+    <string name="pacman_skills">pacmanSkills</string>
+    <string name="invisible">invisible</string>
 
 
 </resources>

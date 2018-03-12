@@ -49,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 0;
+    private static final int PLAY_TAB = 1;
 
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
@@ -105,12 +106,16 @@ public class MainActivity extends AppCompatActivity {
 
         TabLayout tabLayout = findViewById(R.id.tabs);
 
+
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
+        tabLayout.getTabAt(PLAY_TAB).select();
 
         tab_skills = new Tab_Skills();
         tab_play = new Tab_Play();
         tab_settings = new Tab_Settings();
+
+
 
         boolean loggedIn = AccessToken.getCurrentAccessToken() == null;
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email","public_profile"));
