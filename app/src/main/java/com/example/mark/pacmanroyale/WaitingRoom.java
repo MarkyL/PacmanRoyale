@@ -14,6 +14,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import static com.example.mark.pacmanroyale.DrawingView.BLOCK_SIZE_DIVIDER;
+
 
 /**
  * Created by Mark on 21/02/2018.
@@ -267,7 +269,7 @@ public class WaitingRoom {
                     //Log.d(TAG, "onDataChange: enemyblocksize="+enemyBlockSize);
                     if (dataSnapshot.hasChild(context.getString(R.string.screenWidth))) {
                         int enemyScreenWidth = Integer.parseInt(dataSnapshot.child(context.getResources().getString(R.string.screenWidth)).getValue().toString());
-                        int enemyBlockSize = enemyScreenWidth / 17;//(int) (enemyScreenWidth * 0.04);////
+                        int enemyBlockSize = enemyScreenWidth / BLOCK_SIZE_DIVIDER;//(int) (enemyScreenWidth * 0.04);////
                         enemyBlockSize = (enemyBlockSize / 5) * 5;
                         Utils.setEnemyBlockSize(enemyBlockSize);
                         Log.d(TAG, "retrieved enemyblocksize , now calling initEnemyPosVariables, enemy block size = "+enemyBlockSize);

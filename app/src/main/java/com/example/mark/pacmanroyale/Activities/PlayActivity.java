@@ -17,7 +17,7 @@ import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Utils;
 
 
-public class PlayActivity extends AppCompatActivity implements DrawingView.Iinterface{
+public class PlayActivity extends AppCompatActivity implements DrawingView.Iinterface {
 
     private static final String TAG = "PlayActivity";
     private static final String GAME_MODE = "GAME_MODE";
@@ -31,6 +31,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
 
 
     private LinearLayout surfaceView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
