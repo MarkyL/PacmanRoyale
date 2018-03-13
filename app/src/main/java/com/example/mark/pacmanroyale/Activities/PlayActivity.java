@@ -14,7 +14,7 @@ import android.widget.TextView;
 import com.example.mark.pacmanroyale.DrawingView;
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
-import com.example.mark.pacmanroyale.Utils;
+import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 
 
 public class PlayActivity extends AppCompatActivity implements DrawingView.Iinterface {
@@ -91,11 +91,11 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: PlayActivity called");
-        if (Utils.getVirtualRoomReference() != null) {
-            Utils.getVirtualRoomReference().removeValue();
+        if (VirtualRoomUtils.getVirtualRoomReference() != null) {
+            VirtualRoomUtils.getVirtualRoomReference().removeValue();
         }
         super.onDestroy();
-        //Utils.setUserPresenceOffline(this);
+        //FireBaseUtils.setUserPresenceOffline(this);
     }
 
 

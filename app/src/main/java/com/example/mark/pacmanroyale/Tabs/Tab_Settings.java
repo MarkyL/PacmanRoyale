@@ -10,7 +10,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import com.example.mark.pacmanroyale.R;
-import com.example.mark.pacmanroyale.Utils;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -40,7 +40,7 @@ public class Tab_Settings extends Fragment implements View.OnClickListener{
         switch (view.getId()){
             case (R.id.logOutBtn): {
                // FirebaseAuth.getInstance().signOut();
-                Utils.setUserPresenceOffline(getContext());
+                UserInformationUtils.setUserPresenceOffline(getContext());
                 AuthUI.getInstance()
                         .signOut(getContext())
                         .addOnCompleteListener(new OnCompleteListener<Void>() {

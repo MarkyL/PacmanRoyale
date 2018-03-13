@@ -15,7 +15,7 @@ import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
 import com.example.mark.pacmanroyale.UserPresence;
-import com.example.mark.pacmanroyale.Utils;
+import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
@@ -280,7 +280,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
         Ghost ghost = new Ghost(1, 1, 0, 0);
         Pacman pacman = new Pacman(1, 1, 0, 0);
-        DatabaseReference mDatabase = Utils.getFireBaseDataBase();
+        DatabaseReference mDatabase = FireBaseUtils.getFireBaseDataBase();
         String mUserId = FirebaseAuth.getInstance().getUid();
         DatabaseReference userReference = mDatabase.child(getString(R.string.users_node)).child(mUserId);
         DatabaseReference pacmanReference = userReference.child(getString(R.string.pacman_node));

@@ -7,6 +7,9 @@ import android.util.Log;
 
 import com.example.mark.pacmanroyale.Activities.PlayActivity;
 import com.example.mark.pacmanroyale.Enums.GameMode;
+import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
+import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -45,7 +48,7 @@ public class WaitingRoom {
 
     public WaitingRoom(Context context) {
         this.context = context;
-        this.userID = Utils.getUserInformation().getUserId();
+        this.userID = UserInformationUtils.getUserInformation().getUserId();
     }
 //
 //    public WaitingRoom() {
@@ -103,8 +106,8 @@ public class WaitingRoom {
                 gameMode = GameMode.PACMAN;
                 //addPacmanPlayer(userID);
                 foundMatch = false;
-                Utils.setUserPresenceSearchingForGhost(context);
-                dbWaitingListReference = Utils.getFireBasePacmanWaitingList(context).child(userID);
+                UserInformationUtils.setUserPresenceSearchingForGhost(context);
+                dbWaitingListReference = FireBaseUtils.getFireBasePacmanWaitingList(context).child(userID);
                 dbWaitingListReference.setValue(NULL);
                 dbWaitingListReference.onDisconnect().removeValue();
                 //listenToInvites(dbWaitingListReference);
@@ -122,7 +125,7 @@ public class WaitingRoom {
 //                                enemyID = ghostWaitingList.get(0);
 //                               // ghostWaitingList.remove(0);
 //                                //pacmanWaitingList.remove(myPositionInWaitingList);
-//                                Utils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
+//                                FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
 //                                dbWaitingListReference.removeValue();
 //                                gameRoom = new VirtualGameRoom(userID, enemyID, true);
 //                                createGameRoomInFireBase();
@@ -145,8 +148,8 @@ public class WaitingRoom {
             case GHOST: {
                 gameMode = GameMode.GHOST;
                 //addGhostPlayer(userID);
-                Utils.setUserPresenceSearchingForPacman(context);
-                dbWaitingListReference = Utils.getFireBaseGhostWaitingList(context).child(userID);
+                UserInformationUtils.setUserPresenceSearchingForPacman(context);
+                dbWaitingListReference = FireBaseUtils.getFireBaseGhostWaitingList(context).child(userID);
                 dbWaitingListReference.setValue(NULL);
                 dbWaitingListReference.onDisconnect().removeValue();
                 listenToInvites(dbWaitingListReference);
@@ -161,7 +164,7 @@ public class WaitingRoom {
 //                                enemyID = pacmanWaitingList.get(0);
 //                                pacmanWaitingList.remove(0);
 //                                ghostWaitingList.remove(myPositionInWaitingList);
-//                                Utils.getFireBasePacmanWaitingList(context).child(enemyID).setValue(userID);
+//                                FireBaseUtils.getFireBasePacmanWaitingList(context).child(enemyID).setValue(userID);
 //                                dbWaitingListReference.removeValue();
 //                                gameRoom = new VirtualGameRoom(userID, enemyID, false);
 //                                //dbWaitingListReference.removeEventListener(inviteEventListener);
@@ -232,21 +235,21 @@ public class WaitingRoom {
 //                        }
 //                    }
                     gameRoom = new VirtualGameRoom(userID, enemyID, false);
-                    Utils.setVirtualGameRoom(gameRoom);
+                    VirtualRoomUtils.setVirtualGameRoom(gameRoom);
                     //Toast.makeText(context, "INVITED =me as "+userID+" enemy as "+enemyID, Toast.LENGTH_SHORT).show();
 
                 String virtualRoomID = enemyID + "+" + userID;
                 Log.d(TAG, "ghost sets his virtualRoomID params to = " + virtualRoomID);
-                DatabaseReference virtualRoomReference = Utils.getFireBaseVirtualRoomReference(context).child(virtualRoomID);
+                DatabaseReference virtualRoomReference = FireBaseUtils.getFireBaseVirtualRoomReference(context).child(virtualRoomID);
                 virtualRoomReference.child(context.getString(R.string.ghost_id)).setValue(userID);
-                virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.level)).setValue(Utils.getUserInformation().getPacman().getLevel());
-                virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.experience)).setValue(Utils.getUserInformation().getPacman().getExperience());
+                virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.level)).setValue(UserInformationUtils.getUserInformation().getPacman().getLevel());
+                virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.experience)).setValue(UserInformationUtils.getUserInformation().getPacman().getExperience());
                 virtualRoomReference.onDisconnect().removeValue();
-                Utils.setVirtualRoomReference(virtualRoomReference);
+                VirtualRoomUtils.setVirtualRoomReference(virtualRoomReference);
                 //  }
                 dbWaitingListReference.removeValue();
 
-                Utils.setUserPresencePlaying(context);
+                UserInformationUtils.setUserPresencePlaying(context);
                 Intent playIntent = new Intent(context, PlayActivity.class);
                 playIntent.putExtra(GAME_MODE, gameMode);
                 context.startActivity(playIntent);
@@ -263,7 +266,7 @@ public class WaitingRoom {
 
         //if (enemyBlockSize == 0) {
             Log.d(TAG, "entered the if (enemyblocksize = 0)");
-            Utils.getFireBaseUsersNodeReference(context).child(enemyID).addListenerForSingleValueEvent(new ValueEventListener() {
+            FireBaseUtils.getFireBaseUsersNodeReference(context).child(enemyID).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     //Log.d(TAG, "onDataChange: enemyblocksize="+enemyBlockSize);
@@ -271,7 +274,7 @@ public class WaitingRoom {
                         int enemyScreenWidth = Integer.parseInt(dataSnapshot.child(context.getResources().getString(R.string.screenWidth)).getValue().toString());
                         int enemyBlockSize = enemyScreenWidth / BLOCK_SIZE_DIVIDER;//(int) (enemyScreenWidth * 0.04);////
                         enemyBlockSize = (enemyBlockSize / 5) * 5;
-                        Utils.setEnemyBlockSize(enemyBlockSize);
+                        UserInformationUtils.setEnemyBlockSize(enemyBlockSize);
                         Log.d(TAG, "retrieved enemyblocksize , now calling initEnemyPosVariables, enemy block size = "+enemyBlockSize);
                         //initEnemyPosVariables();
                     }
@@ -305,10 +308,10 @@ public class WaitingRoom {
                     retrieveEnemyBlockSize();
                     // ghostWaitingList.remove(0);
                     //pacmanWaitingList.remove(myPositionInWaitingList);
-                    Utils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
+                    FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
                     dbWaitingListReference.removeValue();
                     gameRoom = new VirtualGameRoom(userID, enemyID, true);
-                    Utils.setVirtualGameRoom(gameRoom);
+                    VirtualRoomUtils.setVirtualGameRoom(gameRoom);
                     createGameRoomInFireBase();
                     Log.d(TAG, "doInBackground() finished - found a match!");
                     //dbWaitingListReference.removeEventListener(inviteEventListener);
@@ -324,14 +327,14 @@ public class WaitingRoom {
             Log.d(TAG, "onPostExecute() " + s);
             String virtualRoomID = userID + "+" + enemyID;
             Log.d(TAG, "onPostExecute() virtualRoomID = " + virtualRoomID);
-            DatabaseReference virtualRoomReference = Utils.getFireBaseVirtualRoomReference(context).child(virtualRoomID);
+            DatabaseReference virtualRoomReference = FireBaseUtils.getFireBaseVirtualRoomReference(context).child(virtualRoomID);
             virtualRoomReference.child(context.getString(R.string.pacman_id)).setValue(userID);
-            virtualRoomReference.child(context.getString(R.string.pacman_node)).child(context.getString(R.string.level)).setValue(Utils.getUserInformation().getPacman().getLevel());
-            virtualRoomReference.child(context.getString(R.string.pacman_node)).child(context.getString(R.string.experience)).setValue(Utils.getUserInformation().getPacman().getExperience());
+            virtualRoomReference.child(context.getString(R.string.pacman_node)).child(context.getString(R.string.level)).setValue(UserInformationUtils.getUserInformation().getPacman().getLevel());
+            virtualRoomReference.child(context.getString(R.string.pacman_node)).child(context.getString(R.string.experience)).setValue(UserInformationUtils.getUserInformation().getPacman().getExperience());
             virtualRoomReference.onDisconnect().removeValue();
-            Utils.setVirtualRoomReference(virtualRoomReference);
+            VirtualRoomUtils.setVirtualRoomReference(virtualRoomReference);
 
-            Utils.setUserPresencePlaying(context);
+            UserInformationUtils.setUserPresencePlaying(context);
             Intent playIntent = new Intent(context, PlayActivity.class);
             playIntent.putExtra(GAME_MODE, gameMode);
             context.startActivity(playIntent);

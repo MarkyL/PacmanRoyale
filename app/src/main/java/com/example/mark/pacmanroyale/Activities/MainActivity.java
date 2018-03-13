@@ -13,7 +13,6 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -28,7 +27,9 @@ import com.example.mark.pacmanroyale.Tabs.Tab_Settings;
 import com.example.mark.pacmanroyale.Tabs.Tab_Skills;
 import com.example.mark.pacmanroyale.User.UserInformation;
 import com.example.mark.pacmanroyale.UserPresence;
-import com.example.mark.pacmanroyale.Utils;
+import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
+import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 import com.example.mark.pacmanroyale.WaitingRoom;
 import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
@@ -139,13 +140,13 @@ public class MainActivity extends AppCompatActivity {
     // to convert his x/y to my x/y coordinates.
     private void setScreenWidthSize() {
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        Utils.getFireBaseDataBase().child(getString(R.string.users_node)).child(mFirebaseAuth.getUid()).child(getString(R.string.screenWidth)).setValue(screenWidth);
+        FireBaseUtils.getFireBaseDataBase().child(getString(R.string.users_node)).child(mFirebaseAuth.getUid()).child(getString(R.string.screenWidth)).setValue(screenWidth);
     }
 
     // set user status to ONLINE, turn OFFLINE when he goes off.
     private void setUserPresence() {
-        Utils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).setValue(UserPresence.ONLINE);
-        Utils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).onDisconnect().setValue(UserPresence.OFFLINE);
+        FireBaseUtils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).setValue(UserPresence.ONLINE);
+        FireBaseUtils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).onDisconnect().setValue(UserPresence.OFFLINE);
     }
 
 
@@ -154,15 +155,15 @@ public class MainActivity extends AppCompatActivity {
         final String currentUserId = mFirebaseAuth.getUid();
         userInformation = new UserInformation();
         userInformation.setUserId(currentUserId);
-        Utils.setUserInformation(userInformation);
-        Utils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
+        UserInformationUtils.setUserInformation(userInformation);
+        FireBaseUtils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d(TAG, "loadUserDetails() - onDataChange ");
                 userInformation = dataSnapshot.getValue(UserInformation.class);
                 userInformation.setUserId(dataSnapshot.getKey());
                 setUserPresence();
-                Utils.setUserInformation(userInformation);
+                UserInformationUtils.setUserInformation(userInformation);
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -175,9 +176,9 @@ public class MainActivity extends AppCompatActivity {
     // to load all the current waiting player lists.
     public void initWaitingRoom() {
         final WaitingRoom waitingRoom = new WaitingRoom(this);
-        Utils.setWaitingRoom(waitingRoom);
+        WaitingRoomUtils.setWaitingRoom(waitingRoom);
 
-        Utils.getFireBaseDataBase().child(getString(R.string.waiting_room)).addValueEventListener(new ValueEventListener() {
+        FireBaseUtils.getFireBaseDataBase().child(getString(R.string.waiting_room)).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 // get waiting room changes to map
@@ -194,11 +195,11 @@ public class MainActivity extends AppCompatActivity {
                 ArrayList<String> ghostWaitingList;
                 if (pacmanWaitingMap != null) {
                     pacmanWaitingList = new ArrayList<>(pacmanWaitingMap.keySet());
-                    Utils.getWaitingRoom().setPacmanWaitingList(pacmanWaitingList);
+                    WaitingRoomUtils.getWaitingRoom().setPacmanWaitingList(pacmanWaitingList);
                 }
                 if (ghostWaitingMap != null) {
                     ghostWaitingList = new ArrayList<>(ghostWaitingMap.keySet());
-                    Utils.getWaitingRoom().setGhostWaitingList(ghostWaitingList);
+                    WaitingRoomUtils.getWaitingRoom().setGhostWaitingList(ghostWaitingList);
                 }
             }
 
@@ -228,13 +229,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Utils.setUserPresenceOffline(this);
+        UserInformationUtils.setUserPresenceOffline(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Utils.setUserPresenceOnline(this);
+        UserInformationUtils.setUserPresenceOnline(this);
     }
 
     /**

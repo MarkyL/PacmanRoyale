@@ -1,7 +1,6 @@
 package com.example.mark.pacmanroyale.Tabs;
 
 import android.content.Intent;
-import android.media.Image;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,7 +11,8 @@ import android.widget.ImageView;
 import com.example.mark.pacmanroyale.Activities.PlayActivity;
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
-import com.example.mark.pacmanroyale.Utils;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
+import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 
 /**
  * Created by Mark on 17/02/2018.
@@ -41,7 +41,7 @@ public class Tab_Play extends Fragment implements View.OnClickListener {
 
         switch (view.getId()) {
             case (R.id.playBtn): {
-                Utils.setUserPresenceSearchingForGhost(getContext());
+                UserInformationUtils.setUserPresenceSearchingForGhost(getContext());
                 Intent playIntent = new Intent(getContext(), PlayActivity.class);
                 playIntent.putExtra(GAME_MODE, GameMode.VS_PC);
                 startActivity(playIntent);
@@ -50,10 +50,10 @@ public class Tab_Play extends Fragment implements View.OnClickListener {
             case (R.id.playAsPacmanBtn): {
                 ImageView loaderImage = getActivity().findViewById(R.id.play_loader);
                 loaderImage.setVisibility(View.VISIBLE);
-                Utils.getWaitingRoom().beginMatchMaking(GameMode.PACMAN);
+                WaitingRoomUtils.getWaitingRoom().beginMatchMaking(GameMode.PACMAN);
             } break;
             case (R.id.playAsGhostBtn): {
-                Utils.getWaitingRoom().beginMatchMaking(GameMode.GHOST);
+                WaitingRoomUtils.getWaitingRoom().beginMatchMaking(GameMode.GHOST);
             }
             break;
         }

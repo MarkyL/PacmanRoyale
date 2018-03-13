@@ -9,12 +9,11 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
-import com.example.mark.pacmanroyale.Utils;
+import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -49,8 +48,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View view) {
         switch (view.getId()) {
             case (R.id.signupButton): {
-                Toast.makeText(this, "Yet to be implemented!", Toast.LENGTH_SHORT).show();
-                //beginSignUp();
+                //Toast.makeText(this, "Yet to be implemented!", Toast.LENGTH_SHORT).show();
+                beginSignUp();
             } break;
         }
     }
@@ -103,7 +102,7 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
         Ghost ghost = new Ghost(1,1,0,0);
         Pacman pacman = new Pacman(1,1,0,0);
-        DatabaseReference mDatabase = Utils.getFireBaseDataBase();
+        DatabaseReference mDatabase = FireBaseUtils.getFireBaseDataBase();
         String mUserId = FirebaseAuth.getInstance().getUid();
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.level)).setValue(pacman.getLevel());
         mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.experience)).setValue(pacman.getExperience());

@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 
 /**
  * Created by Mark on 24/02/2018.
@@ -27,7 +28,7 @@ public class VirtualGameRoom {
         this.userID2 = userID2;
 
         if (amIPacman) { // I play as pacman
-            myPacman = Utils.getUserInformation().getPacman();
+            myPacman = UserInformationUtils.getUserInformation().getPacman();
             //enemyGhost =
         }
 

@@ -15,6 +15,8 @@ import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.User.Pacman;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
+import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -167,7 +169,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         yPosPacman = 13 * blockSize;
 
         if (gameMode == GameMode.GHOST || gameMode == GameMode.PACMAN) {
-            virtualRoomReference = Utils.getVirtualRoomReference();
+            virtualRoomReference = VirtualRoomUtils.getVirtualRoomReference();
             virtualRoomGhostReference = virtualRoomReference.child(getResources().getString(R.string.ghost_node));
             virtualRoomPacmanReference = virtualRoomReference.child(getResources().getString(R.string.pacman_node));
         }
@@ -566,7 +568,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
 
             if (enemyBlockSize == 0) {
-                enemyBlockSize = Utils.getEnemyBlockSize();
+                enemyBlockSize = UserInformationUtils.getEnemyBlockSize();
                 if (enemyBlockSize != 0) {
                     Log.d(TAG, "run: enemyBlockSize != 0");
                     initEnemyPosVariables();
