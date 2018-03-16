@@ -1,14 +1,12 @@
 package com.example.mark.pacmanroyale.Activities;
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -203,6 +201,23 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 invisibleButton.setEnabled(true);
             }
         }, 12000);
+
+    }
+
+    @Override
+    public void onBackPressed() {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.exit_match_title)
+                    .setMessage(R.string.exit_match_message)
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            PlayActivity.super.onBackPressed();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null);
+            AlertDialog dialog = builder.create();
+            dialog.show();
 
     }
 }

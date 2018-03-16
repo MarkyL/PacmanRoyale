@@ -1,5 +1,6 @@
 package com.example.mark.pacmanroyale.Activities;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -7,12 +8,12 @@ import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.design.widget.TabItem;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Base64;
 import android.util.Log;
@@ -22,14 +23,16 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.mark.pacmanroyale.Enums.UserPresence;
+import com.example.mark.pacmanroyale.MiscDesign.SwipeableViewPager;
 import com.example.mark.pacmanroyale.R;
-import com.example.mark.pacmanroyale.Tabs.Tab_Play;
-import com.example.mark.pacmanroyale.Tabs.Tab_Settings;
-import com.example.mark.pacmanroyale.Tabs.Tab_Skills;
+import com.example.mark.pacmanroyale.Tabs.TabPlay;
+import com.example.mark.pacmanroyale.Tabs.TabSettings;
+import com.example.mark.pacmanroyale.Tabs.TabSkills;
 import com.example.mark.pacmanroyale.User.UserInformation;
-import com.example.mark.pacmanroyale.UserPresence;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
+import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 import com.example.mark.pacmanroyale.WaitingRoom;
 import com.facebook.AccessToken;
@@ -47,7 +50,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMatchInterface {
 
     private static final String TAG = "MainActivity";
     private static final int RC_SIGN_IN = 0;
@@ -58,11 +61,15 @@ public class MainActivity extends AppCompatActivity {
 
     private UserInformation userInformation;
 
-    private Tab_Skills tab_skills;
-    private Tab_Play tab_play;
-    private Tab_Settings tab_settings;
+    private TabSkills tab_skills;
+    private TabPlay tab_play;
+    private TabSettings tab_settings;
 
-    private ViewPager mViewPager;
+    //private ViewPager mViewPager;
+    private SwipeableViewPager mSwipeAbleViewPager;
+
+    private boolean mShouldAllowBackPress = true;
+
     private ImageView loadingScreen;
 
     /**
@@ -74,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
      * {@link android.support.v4.app.FragmentStatePagerAdapter}.
      */
     private SectionsPagerAdapter mSectionsPagerAdapter;
-    private TabLayout tabLayout;
+    private TabLayout mTabLayout;
 
 
     /**
@@ -87,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         loadingScreen = findViewById(R.id.loading_screen);
-        tabLayout = findViewById(R.id.tabs);
+        mTabLayout = findViewById(R.id.tabs);
 
 
 
@@ -96,11 +103,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 loadingScreen.setVisibility(View.GONE);
-                tabLayout.setVisibility(View.VISIBLE);
-                mViewPager.setVisibility(View.VISIBLE);
-
+                toggleTabsVisibility(true);
+                mSwipeAbleViewPager.setVisibility(View.VISIBLE);
             }
-        }, 4000);
+        }, 5000);
 
         printHashKey();
 
@@ -111,21 +117,23 @@ public class MainActivity extends AppCompatActivity {
         mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = findViewById(R.id.container);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
+        //mViewPager = findViewById(R.id.container);
+        mSwipeAbleViewPager = findViewById(R.id.container);
+        //mSwipeAbleViewPager.mIsSwipingEnabled = true;
 
-        //TabLayout tabLayout = findViewById(R.id.tabs);
+//        mSwipeAbleViewPager.addView(findViewById(R.id.container));
+        mSwipeAbleViewPager.setAdapter(mSectionsPagerAdapter);
+        mSwipeAbleViewPager.mIsSwipingEnabled = true;
 
+        mTabLayout = findViewById(R.id.tabs);
 
-        mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
-        tabLayout.getTabAt(PLAY_TAB).select();
+        mSwipeAbleViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+        mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mSwipeAbleViewPager));
+        mTabLayout.getTabAt(PLAY_TAB).select();
 
-        tab_skills = new Tab_Skills();
-        tab_play = new Tab_Play();
-        tab_settings = new Tab_Settings();
-
-
+        tab_skills = new TabSkills();
+        tab_play = new TabPlay();
+        tab_settings = new TabSettings();
 
         boolean loggedIn = AccessToken.getCurrentAccessToken() == null;
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email","public_profile"));
@@ -142,6 +150,7 @@ public class MainActivity extends AppCompatActivity {
         } else { // user not logged in.
             loadLogInView();
         }
+
     }
 
     // Used for sending x/y positions according to enemy's blockSize.
@@ -239,12 +248,26 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         UserInformationUtils.setUserPresenceOffline(this);
+        if (VirtualRoomUtils.getVirtualRoomReference() != null) { // in case disconnect is late to work.
+            VirtualRoomUtils.getVirtualRoomReference().removeValue();
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         UserInformationUtils.setUserPresenceOnline(this);
+        toggleBackPressAvailability(true);
+    }
+
+    public void toggleTabsVisibility(boolean isTabsShown) {
+        if (mTabLayout != null) {
+            if (isTabsShown) {
+                mTabLayout.setVisibility(View.VISIBLE);
+            } else {
+                mTabLayout.setVisibility(View.INVISIBLE);
+            }
+        }
     }
 
     /**
@@ -276,12 +299,11 @@ public class MainActivity extends AppCompatActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.tab_play, container, false);
-            TextView textView = (TextView) rootView.findViewById(R.id.section_label);
+            TextView textView = rootView.findViewById(R.id.section_label);
             textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
         }
     }
-
 
         public void printHashKey() {
         // used to generate a hash key for SHA-1 code.
@@ -306,6 +328,43 @@ public class MainActivity extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (mShouldAllowBackPress) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this);
+            builder.setTitle(R.string.exit_pacman_royale_title)
+                    .setMessage(R.string.exit_pacman_royale_message)
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            MainActivity.super.onBackPressed();
+                        }
+                    })
+                    .setNegativeButton(R.string.cancel, null);
+            AlertDialog dialog = builder.create();
+            dialog.show();
+        } else {
+            // do nothing.
+        }
+    }
+
+    public void toggleBackPressAvailability(boolean isActive) {
+        mShouldAllowBackPress = isActive;
+    }
+
+    @Override
+    public void toggleSearchingForMatch(boolean isSearching) {
+        if (isSearching) {
+            toggleBackPressAvailability(false);
+            toggleTabsVisibility(false);
+            mSwipeAbleViewPager.mIsSwipingEnabled = false;
+        } else {
+            toggleBackPressAvailability(true);
+            toggleTabsVisibility(true);
+            mSwipeAbleViewPager.mIsSwipingEnabled = true;
+        }
     }
 
     /**

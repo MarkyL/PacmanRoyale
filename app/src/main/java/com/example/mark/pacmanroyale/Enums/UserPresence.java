@@ -1,4 +1,4 @@
-package com.example.mark.pacmanroyale;
+package com.example.mark.pacmanroyale.Enums;
 
 /**
  * Created by Mark on 21/02/2018.

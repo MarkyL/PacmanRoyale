@@ -19,7 +19,7 @@ import com.google.firebase.database.ValueEventListener;
  * Created by Omri on 3/10/2018.
  */
 
-public class Tab_Ghost_Skills extends Fragment {
+public class TabGhostSkills extends Fragment {
 
     TextView ghostNumWins;
     TextView ghostNumGames;

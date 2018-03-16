@@ -35,7 +35,6 @@ public class WaitingRoom {
     private Context context;
     private String userID;
     private String enemyID;
-    private boolean isPlayAsPacman; // true = player is pacman , false = player is ghost.
     private GameMode gameMode;
 
     private boolean foundMatch;
@@ -45,16 +44,15 @@ public class WaitingRoom {
     private ValueEventListener inviteEventListener;
     private Thread mThread;
 
+    public FindAMatchAsyncTask mAsyncTask;
+    DatabaseReference dbWaitingListReference;
+    private boolean mIsMatchMakingRelevantForGhost = false;
+    private boolean mIsMatchMakingRelevantForPacman = false;
 
     public WaitingRoom(Context context) {
         this.context = context;
         this.userID = UserInformationUtils.getUserInformation().getUserId();
     }
-//
-//    public WaitingRoom() {
-//        this.pacmanWaitingList = new ArrayList<>();
-//        this.ghostWaitingList = new ArrayList<>();
-//    }
 
     public void addPacmanPlayer(String userID) {
         pacmanWaitingList.add(userID);
@@ -98,82 +96,28 @@ public class WaitingRoom {
 
     public void beginMatchMaking(GameMode playMode) {
         amInvited = false;
-        final DatabaseReference dbWaitingListReference;
         initArrayListsIfNeeded();
         switch (playMode) {
             case PACMAN: {  
                 // I want to team up with a ghost - INVITE it + create a private virtual room path in db.
                 gameMode = GameMode.PACMAN;
-                //addPacmanPlayer(userID);
                 foundMatch = false;
                 UserInformationUtils.setUserPresenceSearchingForGhost(context);
                 dbWaitingListReference = FireBaseUtils.getFireBasePacmanWaitingList(context).child(userID);
                 dbWaitingListReference.setValue(NULL);
                 dbWaitingListReference.onDisconnect().removeValue();
-                //listenToInvites(dbWaitingListReference);
                 // the following while loop should be written in a separate function - searchForMatch()
-                FindAMatchAsyncTask asyncTask = new FindAMatchAsyncTask(dbWaitingListReference);
-                asyncTask.execute("stam");
-
-//                mThread = new Thread() {
-//                    @Override
-//                    public void run() {
-//                        while (!foundMatch) {
-//                            if (ghostWaitingList.size() > 0) { // I found someone to play with
-//                                foundMatch = true;
-//                                //dbWaitingListReference.removeEventListener(inviteEventListener);
-//                                enemyID = ghostWaitingList.get(0);
-//                               // ghostWaitingList.remove(0);
-//                                //pacmanWaitingList.remove(myPositionInWaitingList);
-//                                FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
-//                                dbWaitingListReference.removeValue();
-//                                gameRoom = new VirtualGameRoom(userID, enemyID, true);
-//                                createGameRoomInFireBase();
-//                                Log.d(TAG, "run() before interrupt");
-//                                this.interrupt();
-//                                //dbWaitingListReference.removeEventListener(inviteEventListener);
-//                            }
-//                        }
-//                        dbWaitingListReference.removeValue();
-//                    }
-//                    @Override
-//                    public boolean isInterrupted() {
-//                        return super.isInterrupted();
-//                    }
-//                };
-//                mThread.start();
-
+                mAsyncTask = new FindAMatchAsyncTask(dbWaitingListReference);
+                mAsyncTask.execute();
             }
             break;
             case GHOST: {
                 gameMode = GameMode.GHOST;
-                //addGhostPlayer(userID);
                 UserInformationUtils.setUserPresenceSearchingForPacman(context);
                 dbWaitingListReference = FireBaseUtils.getFireBaseGhostWaitingList(context).child(userID);
                 dbWaitingListReference.setValue(NULL);
                 dbWaitingListReference.onDisconnect().removeValue();
                 listenToInvites(dbWaitingListReference);
-                // the following while loop should be written in a separate function - searchForMatch()
-//                mThread = new Thread() {
-//                    @Override
-//                    public void run() {
-//                        boolean foundMatch = false;
-//                        while (!foundMatch && !amInvited) {
-//                            if (pacmanWaitingList.size() > 0) {
-//                                foundMatch = true;
-//                                enemyID = pacmanWaitingList.get(0);
-//                                pacmanWaitingList.remove(0);
-//                                ghostWaitingList.remove(myPositionInWaitingList);
-//                                FireBaseUtils.getFireBasePacmanWaitingList(context).child(enemyID).setValue(userID);
-//                                dbWaitingListReference.removeValue();
-//                                gameRoom = new VirtualGameRoom(userID, enemyID, false);
-//                                //dbWaitingListReference.removeEventListener(inviteEventListener);
-//                            }
-//                        }
-//                        dbWaitingListReference.removeValue();
-//                    }
-//                };
-//                mThread.start();
             }
             break;
             case QUICK_MATCH: {
@@ -197,15 +141,16 @@ public class WaitingRoom {
     }
 
     private void listenToInvites(final DatabaseReference dbWaitingListReference) {
+        mIsMatchMakingRelevantForGhost = true;
         inviteEventListener = dbWaitingListReference.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "onDataChange() called. dataSnapshop = " + dataSnapshot.getValue());
+                Log.d(TAG, "onDataChange() called. dataSnapshot = " + dataSnapshot.getValue());
                 if (dataSnapshot.getValue() == null) { // I think it means this node was remove - I found match myself.
                     dbWaitingListReference.removeEventListener(inviteEventListener);
                     return;
                 }
-                if (dataSnapshot.getValue().equals(NULL)) {
+                if (dataSnapshot.getValue().equals(NULL) || !mIsMatchMakingRelevantForGhost) {
                     return;
                 }
                 Log.d(TAG, "onDataChange() - I was invited to play by " + dataSnapshot.getValue());
@@ -213,30 +158,9 @@ public class WaitingRoom {
                 amInvited = true;
                 enemyID = dataSnapshot.getValue().toString();
                 retrieveEnemyBlockSize();
-                // need also to remove myself from firebase.
-//                if (gameMode == GameMode.PACMAN) {
-//                    pacmanWaitingList.remove(myPositionInWaitingList);
-//                    // need to remove the user from the waiting list.
-//                    for (int i = 0; i < ghostWaitingList.size(); i++) {
-//                        if (ghostWaitingList.get(i).equals(enemyID)) {
-//                            ghostWaitingList.remove(i);
-//                            break;
-//                        }
-//                    }
-//                    gameRoom = new VirtualGameRoom(userID, enemyID, true);
-//                    Toast.makeText(context, "INVITED =me as "+userID+" enemy as "+enemyID, Toast.LENGTH_SHORT).show();
-//                }
-//                else { // currently - let's say it's GameMode.GHOST
-//                    ghostWaitingList.remove(myPositionInWaitingList);
-//                    for (int i = 0; i < pacmanWaitingList.size(); i++) {
-//                        if (pacmanWaitingList.get(i).equals(enemyID)) {
-//                            pacmanWaitingList.remove(i);
-//                            break;
-//                        }
-//                    }
-                    gameRoom = new VirtualGameRoom(userID, enemyID, false);
-                    VirtualRoomUtils.setVirtualGameRoom(gameRoom);
-                    //Toast.makeText(context, "INVITED =me as "+userID+" enemy as "+enemyID, Toast.LENGTH_SHORT).show();
+
+                gameRoom = new VirtualGameRoom(userID, enemyID, false);
+                VirtualRoomUtils.setVirtualGameRoom(gameRoom);
 
                 String virtualRoomID = enemyID + "+" + userID;
                 Log.d(TAG, "ghost sets his virtualRoomID params to = " + virtualRoomID);
@@ -246,7 +170,7 @@ public class WaitingRoom {
                 virtualRoomReference.child(context.getString(R.string.ghost_node)).child(context.getString(R.string.experience)).setValue(UserInformationUtils.getUserInformation().getPacman().getExperience());
                 virtualRoomReference.onDisconnect().removeValue();
                 VirtualRoomUtils.setVirtualRoomReference(virtualRoomReference);
-                //  }
+
                 dbWaitingListReference.removeValue();
 
                 UserInformationUtils.setUserPresencePlaying(context);
@@ -260,23 +184,49 @@ public class WaitingRoom {
                 Log.d(TAG, "onCancelled()");
             }
         });
+
+    }
+
+    public void cancelPacmanGame() {
+        cancelAsyncTask();
+        dbWaitingListReference.removeValue();
+        UserInformationUtils.setUserPresenceOnline(context);
+        pacmanWaitingList.remove(userID);
+    }
+
+    public void cancelAsyncTask() {
+        if (mAsyncTask != null) {
+            mAsyncTask.cancel(true);
+            mIsMatchMakingRelevantForPacman = false;
+            Log.d(TAG, "cancelAsyncTask: isCancelled = " + mAsyncTask.isCancelled());
+        }
+    }
+
+    public void cancelGhostGame() {
+        cancelListenToInvites();
+        dbWaitingListReference.removeValue();
+        UserInformationUtils.setUserPresenceOnline(context);
+        ghostWaitingList.remove(userID);
+    }
+
+    public void cancelListenToInvites() {
+        if (dbWaitingListReference != null && inviteEventListener != null) {
+            dbWaitingListReference.removeEventListener(inviteEventListener);
+            mIsMatchMakingRelevantForGhost = false;
+        }
     }
 
     private void retrieveEnemyBlockSize() {
-
-        //if (enemyBlockSize == 0) {
-            Log.d(TAG, "entered the if (enemyblocksize = 0)");
+            Log.d(TAG, "entered the if (enemyBlock size = 0)");
             FireBaseUtils.getFireBaseUsersNodeReference(context).child(enemyID).addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-                    //Log.d(TAG, "onDataChange: enemyblocksize="+enemyBlockSize);
                     if (dataSnapshot.hasChild(context.getString(R.string.screenWidth))) {
                         int enemyScreenWidth = Integer.parseInt(dataSnapshot.child(context.getResources().getString(R.string.screenWidth)).getValue().toString());
-                        int enemyBlockSize = enemyScreenWidth / BLOCK_SIZE_DIVIDER;//(int) (enemyScreenWidth * 0.04);////
+                        int enemyBlockSize = enemyScreenWidth / BLOCK_SIZE_DIVIDER;
                         enemyBlockSize = (enemyBlockSize / 5) * 5;
                         UserInformationUtils.setEnemyBlockSize(enemyBlockSize);
-                        Log.d(TAG, "retrieved enemyblocksize , now calling initEnemyPosVariables, enemy block size = "+enemyBlockSize);
-                        //initEnemyPosVariables();
+                        Log.d(TAG, "retrieved enemyBlock size , now calling initEnemyPosVariables, enemy block size = "+enemyBlockSize);
                     }
                 }
                 @Override
@@ -295,28 +245,23 @@ public class WaitingRoom {
         final DatabaseReference dbWaitingListReference;
         public FindAMatchAsyncTask(final DatabaseReference dbWaitingListReference) {
             this.dbWaitingListReference = dbWaitingListReference;
-
         }
 
         @Override
         protected String doInBackground(String... strings) {
-            while (!foundMatch) {
+            mIsMatchMakingRelevantForPacman = true;
+            while (!foundMatch && mIsMatchMakingRelevantForPacman) {
                 if (ghostWaitingList.size() > 0) { // I found someone to play with
                     foundMatch = true;
-                    //dbWaitingListReference.removeEventListener(inviteEventListener);
                     enemyID = ghostWaitingList.get(0);
                     retrieveEnemyBlockSize();
-                    // ghostWaitingList.remove(0);
-                    //pacmanWaitingList.remove(myPositionInWaitingList);
                     FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
                     dbWaitingListReference.removeValue();
                     gameRoom = new VirtualGameRoom(userID, enemyID, true);
                     VirtualRoomUtils.setVirtualGameRoom(gameRoom);
                     createGameRoomInFireBase();
                     Log.d(TAG, "doInBackground() finished - found a match!");
-                    //dbWaitingListReference.removeEventListener(inviteEventListener);
                 }
-                //onProgressUpdate();
             }
             dbWaitingListReference.removeValue();
             return "something";

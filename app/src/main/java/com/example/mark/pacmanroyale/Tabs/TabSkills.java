@@ -18,15 +18,15 @@ import com.example.mark.pacmanroyale.R;
  * Created by Mark on 17/02/2018.
  */
 
-public class Tab_Skills extends Fragment {
-    private static final String TAG = "Tab_Skills";
+public class TabSkills extends Fragment {
+    private static final String TAG = "TabSkills";
 
     private ViewPager mViewPager;
-    private Tab_Pacman_Skills tab_pacman_skills;
-    private Tab_Play tab_play;
+    private TabPacmanSkills tab_pacman_skills;
+    private TabPlay tab_play;
 
     private PagerAdapter mSectionsPagerAdapter;
-    private Tab_Ghost_Skills tab_ghost_skills;
+    private TabGhostSkills tab_ghost_skills;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -37,17 +37,17 @@ public class Tab_Skills extends Fragment {
         mSectionsPagerAdapter  = new PagerAdapter(getChildFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) rootView.findViewById(R.id.container_skills);
+        mViewPager = rootView.findViewById(R.id.container_skills);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
-        TabLayout tabLayout = (TabLayout)rootView.findViewById(R.id.tabs_skills);
+        TabLayout tabLayout = rootView.findViewById(R.id.tabs_skills);
 
 
         mViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mViewPager));
 
-        tab_pacman_skills = new Tab_Pacman_Skills();
-        tab_ghost_skills = new Tab_Ghost_Skills();
+        tab_pacman_skills = new TabPacmanSkills();
+        tab_ghost_skills = new TabGhostSkills();
 
 
         return rootView;

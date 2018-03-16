@@ -23,6 +23,11 @@
     <string name="title_activity_play">PlayActivity</string>
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
+    <string name="exit_pacman_royale_title">Exit Pacman Royale?</string>
+    <string name="exit_pacman_royale_message">Are you sure you want to exit Pacman Royale?</string>
+    <string name="exit_match_title">Exit Match?</string>
+    <string name="exit_match_message">Are you sure you want to exit the match?</string>
+    <string name="yes">yes</string>
 
     <string name="password_hint">Password</string>
     <string name="email_hint">Email</string>
@@ -80,12 +85,15 @@
     <string name="pacmanDirection">direction</string>
     <string name="pacman_skills">pacmanSkills</string>
     <string name="invisible">invisible</string>
-    <string name="gameOver" />
-    <string name="matchOver">matchOver</string>
+    <string name="play_vs_computer">Play!</string>
+    <string name="play_as_pacman">Play as pacman</string>
+    <string name="play_as_ghost">Play as ghost</string>
+    <string name="searching_for_battle"><b>Searching for battle...</b></string>
+    <string name="cancel">cancel</string>
     <string name="wins">wins</string>
-    <string name="losses">losses</string>
     <string name="totalGames">totalGames</string>
     <string name="winRatio">winRatio</string>
+    <string name="matchOver">matchOver</string>
 
 
 </resources>

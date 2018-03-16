@@ -6,52 +6,80 @@
     android:layout_height="match_parent"
     tools:context="com.example.mark.pacmanroyale.Activities.MainActivity$PlaceholderFragment">
 
-    <ImageView
-        android:id="@+id/play_loader"
+    <LinearLayout
+        android:id="@+id/buttons_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:elevation="2dp"
-        app:srcCompat="@drawable/ghost2"
-        android:visibility="invisible"/>
-
-    <TextView
-        android:id="@+id/section_label"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_marginEnd="@dimen/activity_horizontal_margin"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
-        android:text="play tab"/>
-
-    <Button
-        android:id="@+id/playBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/playAsPacmanBtn"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="22dp"
+        android:orientation="vertical"
         android:gravity="center"
-        android:text="Play!" />
+        android:visibility="visible">
+        <Button
+            android:id="@+id/playBtn"
+            android:layout_width="@dimen/large_button_width"
+            android:layout_height="@dimen/large_button_height"
+            android:drawableStart="@drawable/pc_player"
+            android:gravity="center"
+            android:text="@string/play_vs_computer" />
 
-    <Button
-        android:id="@+id/playAsPacmanBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Play as Pacman" />
+        <Button
+            android:id="@+id/playAsPacmanBtn"
+            android:layout_width="@dimen/large_button_width"
+            android:layout_height="@dimen/large_button_height"
+            android:drawableStart="@drawable/pacman_60x60"
+            android:text="@string/play_as_pacman" />
 
-    <Button
-        android:id="@+id/playAsGhostBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_above="@id/playAsPacmanBtn"
-        android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true"
-        android:text="Play as Ghost" />
+        <Button
+            android:id="@+id/playAsGhostBtn"
+            android:layout_width="@dimen/large_button_width"
+            android:layout_height="@dimen/large_button_height"
+            android:drawableStart="@drawable/ghost_60x60"
+            android:text="@string/play_as_ghost" />
+
+    </LinearLayout>
+
+    <FrameLayout
+        android:id="@+id/loading_layout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:visibility="invisible">
+
+        <ImageView
+            android:id="@+id/play_loader"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitXY"
+            app:srcCompat="@drawable/app_logo"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/searching_for_battle"
+            android:textColor="@color/black"
+            android:textSize="26sp"
+            android:layout_gravity="center|bottom"
+            android:layout_marginBottom="100dp"
+            />
+
+        <Button
+            android:id="@+id/cancelMatchMakingBtn"
+            android:layout_width="@dimen/small_button_width"
+            android:layout_height="@dimen/small_button_height"
+            android:layout_marginBottom="20dp"
+            android:text="@string/cancel"
+            android:layout_gravity="center|bottom"
+            />
+        <ProgressBar
+            android:id="@+id/searching_progress_bar"
+            style="?android:attr/progressBarStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="130dp"
+            android:layout_gravity="center|bottom"
+            android:visibility="visible"/>
+
+    </FrameLayout>
+
 
 
 </RelativeLayout>

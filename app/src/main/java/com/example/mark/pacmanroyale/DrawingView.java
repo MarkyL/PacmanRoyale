@@ -1,6 +1,5 @@
 package com.example.mark.pacmanroyale;
 
-import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,13 +8,9 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.view.View;
-import android.widget.Button;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.Enums.GameMode;
@@ -24,7 +19,6 @@ import com.example.mark.pacmanroyale.User.Pacman;
 import com.example.mark.pacmanroyale.User.UserInformation;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
-import com.firebase.ui.auth.data.model.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -798,7 +792,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     currentScore += 10;
                 }
             }
-
         }
 
         if (gameMode == GameMode.PACMAN) {

@@ -19,8 +19,8 @@ import com.google.android.gms.tasks.Task;
  * Created by Mark on 17/02/2018.
  */
 
-public class Tab_Settings extends Fragment implements View.OnClickListener{
-    private static final String TAG = "Tab_Settings";
+public class TabSettings extends Fragment implements View.OnClickListener{
+    private static final String TAG = "TabSettings";
 
     private Button logoutBtn;
 

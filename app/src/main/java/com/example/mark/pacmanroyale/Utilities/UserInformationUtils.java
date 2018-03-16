@@ -1,10 +1,11 @@
 package com.example.mark.pacmanroyale.Utilities;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.UserInformation;
-import com.example.mark.pacmanroyale.UserPresence;
+import com.example.mark.pacmanroyale.Enums.UserPresence;
 
 /**
  * Created by Omri on 2/17/2018.
@@ -26,6 +27,7 @@ public class UserInformationUtils {
 
     public static void setUserPresenceOffline(Context context) {
         if (userInformation != null) {
+            Log.d(TAG, "setUserPresenceOffline: setting user presence - offline");
             FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.user_presence)).setValue(UserPresence.OFFLINE);
         }
     }

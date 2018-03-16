@@ -14,7 +14,7 @@ import android.widget.Toast;
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
-import com.example.mark.pacmanroyale.UserPresence;
+import com.example.mark.pacmanroyale.Enums.UserPresence;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.facebook.AccessToken;
 import com.facebook.CallbackManager;

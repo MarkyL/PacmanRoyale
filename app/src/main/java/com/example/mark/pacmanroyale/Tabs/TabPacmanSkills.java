@@ -5,15 +5,12 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
-import com.example.mark.pacmanroyale.Activities.PlayActivity;
-import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.google.firebase.database.DataSnapshot;
@@ -24,7 +21,7 @@ import com.google.firebase.database.ValueEventListener;
  * Created by Omri on 3/10/2018.
  */
 
-public class Tab_Pacman_Skills extends Fragment {
+public class TabPacmanSkills extends Fragment {
 
     private static final String TAG = "Tab_Pacman_Skills";
 

@@ -10,10 +10,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.example.mark.pacmanroyale.Enums.UserPresence;
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
-import com.example.mark.pacmanroyale.UserPresence;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
