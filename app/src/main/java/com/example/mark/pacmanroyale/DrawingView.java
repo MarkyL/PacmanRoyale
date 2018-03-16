@@ -1,5 +1,6 @@
 package com.example.mark.pacmanroyale;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,15 +9,22 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.os.Handler;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import android.view.View;
+import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.Enums.GameMode;
+import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
+import com.example.mark.pacmanroyale.User.UserInformation;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
+import com.firebase.ui.auth.data.model.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -42,6 +50,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private SurfaceHolder surfaceHolder;
     private boolean canDraw;// = true;
 
+    private Context mContext;
     private Canvas canvas;
 
     private DatabaseReference virtualRoomReference;
@@ -148,10 +157,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private boolean firstTime = true;
     private Iinterface myInterface;
     private boolean isSwiped = false;
+    private boolean isGameOver =false;
 
     // Initializing the member variables
     public DrawingView(Context context, GameMode gameMode) {
         super(context);
+        this.mContext =context;
         surfaceHolder = getHolder();
         surfaceHolder.addCallback(this);
         frameTicker = 1000 / totalFrame;
@@ -266,6 +277,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
                 if(dataSnapshot.hasChild(getResources().getString(R.string.invisible))){
                     visibility = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.invisible)).getValue().toString());
+                }
+
+                if(dataSnapshot.hasChild(getResources().getString(R.string.matchOver))){
+                    // isPacman = true , means Pacman ate all the pellets and won
+                    gameOver(true);
                 }
 //                if (mPacman != null) {
 //                    xPosPacman = mPacman.getxPos();
@@ -553,18 +569,19 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 //                canDraw = false;
 //            }
 
-            boolean xGhostCatched = (xPosPacman <= xPosGhost + XYDelta && xPosPacman >= xPosGhost - XYDelta);
-            boolean xGhost2Catched = (xPosPacman <= xPosGhost2 + XYDelta && xPosPacman >= xPosGhost2 - XYDelta);
-            boolean xGhost3Catched = (xPosPacman <= xPosGhost3 + XYDelta && xPosPacman >= xPosGhost3 - XYDelta);
+            boolean xGhostCought = (xPosPacman <= xPosGhost + XYDelta && xPosPacman >= xPosGhost - XYDelta);
+            boolean xGhost2Cought= (xPosPacman <= xPosGhost2 + XYDelta && xPosPacman >= xPosGhost2 - XYDelta);
+            boolean xGhost3Cought = (xPosPacman <= xPosGhost3 + XYDelta && xPosPacman >= xPosGhost3 - XYDelta);
 
-            boolean yGhostCatched = (yPosPacman <= yPosGhost + XYDelta && yPosPacman >= yPosGhost - XYDelta);
-            boolean yGhost2Catched = (yPosPacman <= yPosGhost2 + XYDelta && yPosPacman >= yPosGhost2 - XYDelta);
-            boolean yGhost3Catched = (yPosPacman <= yPosGhost3 + XYDelta && yPosPacman >= yPosGhost3 - XYDelta);
+            boolean yGhostCought = (yPosPacman <= yPosGhost + XYDelta && yPosPacman >= yPosGhost - XYDelta);
+            boolean yGhost2Cought = (yPosPacman <= yPosGhost2 + XYDelta && yPosPacman >= yPosGhost2 - XYDelta);
+            boolean yGhost3Cought = (yPosPacman <= yPosGhost3 + XYDelta && yPosPacman >= yPosGhost3 - XYDelta);
 
-            if (((xGhostCatched && yGhostCatched) || (xGhost2Catched && yGhost2Catched) || (xGhost3Catched && yGhost3Catched)) && (visibility == DEFAULT_VISIBILITY)) {
+            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
                 String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
                 Log.d(TAG, "" + gameOverMessage);
-                canDraw = false;
+                // isPacman = false , means Pacman was cought by a ghost
+                gameOver(false);
             }
 
             if (enemyBlockSize == 0) {
@@ -627,8 +644,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         }
     }
 
+
     public interface Iinterface {
         void setVisibilities();
+        void endGame(boolean isPacman);
     }
 
     public void initEnemyPosVariables() {
@@ -702,6 +721,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
         }
         isFirstTimePellet = false;
+
     }
 
     // Updates the character sprite and handles collisions
@@ -771,7 +791,9 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     // Toggle pellet so it won't be drawn anymore
                     leveldata1[charYPos / blockSize][charXPos / blockSize] = (short) (ch ^ 16);
                     if (--countPellets <= 0 && (gameMode != GameMode.GHOST)) {
-                        canDraw = false;
+                        virtualRoomPacmanReference.child(getResources().getString(R.string.matchOver)).setValue(true);
+                        // isPacman = true , means Pacman ate all the pellets and won
+                        gameOver(true);
                     }
                     currentScore += 10;
                 }
@@ -809,6 +831,57 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             canvas.drawBitmap(ghost1Bitmap, xPosGhost, yPosGhost, paint);
             drawPacman();
             drawRelevantGhostBitmap();
+        }
+    }
+
+    private void gameOver(boolean isPacman) {
+        // stop drawing , game is over.
+        canDraw = false;
+        //update pacman/ghost statistics
+        if(gameMode != GameMode.VS_PC) {
+            updateStatistics(isPacman);
+        }
+        // show relevant end game dialog to each of the players
+        myInterface.endGame(isPacman);
+    }
+
+    private void updateStatistics(boolean isPacman) {
+
+        UserInformation theUser = UserInformationUtils.getUserInformation();
+        Pacman usersPacman = theUser.getPacman();
+        Ghost usersGhost = theUser.getGhost();
+
+        if(isPacman) {// means Pacman won so we add 1 win to Pacman and 1 game to totalGames of Ghost/Pacman and update win Ratio for both
+            if (gameMode == GameMode.PACMAN) {
+                usersPacman.setWins(usersPacman.getWins()+1);
+                usersPacman.setTotalGames(usersPacman.getTotalGames()+1);
+                UserInformationUtils.setUserInformation(theUser);
+                UserInformationUtils.updateUsersPacmanWins(mContext);
+                UserInformationUtils.updateUsersPacmanTotalGames(mContext);
+                UserInformationUtils.updateUsersPacmanWinRatio(mContext);
+
+            } else if (gameMode == GameMode.GHOST) {
+                usersGhost.setTotalGames(usersGhost.getTotalGames()+1);
+                UserInformationUtils.setUserInformation(theUser);
+                UserInformationUtils.updateUsersGhostTotalGames(mContext);
+                UserInformationUtils.updateUsersGhostWinRatio(mContext);
+            }
+        }
+        else{// means Ghost won so we add 1 win to Ghost and 1 game to totalGames of Ghost/Pacman and update win Ratio for both
+            if (gameMode == GameMode.PACMAN) {
+                usersPacman.setTotalGames(usersPacman.getTotalGames()+1);
+                UserInformationUtils.setUserInformation(theUser);
+                UserInformationUtils.updateUsersPacmanTotalGames(mContext);
+                UserInformationUtils.updateUsersPacmanWinRatio(mContext);
+
+            } else if (gameMode == GameMode.GHOST) {
+                usersGhost.setWins(usersGhost.getWins()+1);
+                usersGhost.setTotalGames(usersGhost.getTotalGames()+1);
+                UserInformationUtils.setUserInformation(theUser);
+                UserInformationUtils.updateUsersGhostWins(mContext);
+                UserInformationUtils.updateUsersGhostTotalGames(mContext);
+                UserInformationUtils.updateUsersGhostWinRatio(mContext);
+            }
         }
     }
 
@@ -983,7 +1056,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 // Toggle pellet so it won't be drawn anymore
                 leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 16);
                 if (--countPellets <= 0) {
-                    canDraw = false;
+                    gameOver(true);
                 }
                 currentScore += 10;
             }

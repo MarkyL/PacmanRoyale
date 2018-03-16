@@ -10,16 +10,48 @@ public class Pacman {
     private int experience;
     private int xPos;
     private int yPos;
+    private int wins;
+    private int totalGames;
+    private float winRatio;
 
     public Pacman(){
 
     }
 
-    public Pacman(int level, int experience, int xPos, int yPos) {
+    public Pacman(int level, int experience, int xPos, int yPos , int wins , int totalGames ) {
         this.level = level;
         this.experience = experience;
         this.xPos = xPos;
         this.yPos = yPos;
+        this.wins = wins;
+        this.totalGames = totalGames;
+        this.winRatio = 0;
+    }
+
+    public float getWinRatio() {
+        if(totalGames> 0)
+            return (float)wins/totalGames;
+        return winRatio;
+    }
+
+    public void setWinRatio(float winRatio) {
+        this.winRatio = winRatio;
+    }
+
+    public int getWins() {
+        return wins;
+    }
+
+    public void setWins(int numOfWins) {
+        this.wins = numOfWins;
+    }
+
+    public int getTotalGames() {
+        return totalGames;
+    }
+
+    public void setTotalGames(int totalGames) {
+        this.totalGames = totalGames;
     }
 
     public int getLevel() {

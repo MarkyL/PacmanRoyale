@@ -49,6 +49,42 @@ public class UserInformationUtils {
         }
     }
 
+    public static void updateUsersPacmanWins(Context context) {
+        if (userInformation != null) {
+            FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.pacman_node)).child(context.getString(R.string.wins)).setValue(userInformation.getPacman().getWins());
+        }
+    }
+
+    public static void updateUsersPacmanTotalGames(Context context) {
+        if (userInformation != null) {
+            FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.pacman_node)).child(context.getString(R.string.totalGames)).setValue(userInformation.getPacman().getTotalGames());
+        }
+    }
+
+    public static void updateUsersGhostWins(Context context) {
+        if (userInformation != null) {
+            FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.ghost_node)).child(context.getString(R.string.wins)).setValue(userInformation.getGhost().getWins());
+        }
+    }
+
+    public static void updateUsersGhostWinRatio(Context context) {
+        if (userInformation != null) {
+            FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.ghost_node)).child(context.getString(R.string.winRatio)).setValue(userInformation.getGhost().getWinRatio());
+        }
+    }
+
+    public static void updateUsersPacmanWinRatio(Context context) {
+        if (userInformation != null) {
+            FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.pacman_node)).child(context.getString(R.string.winRatio)).setValue(userInformation.getPacman().getWinRatio());
+        }
+    }
+
+    public static void updateUsersGhostTotalGames(Context context) {
+        if (userInformation != null) {
+            FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.ghost_node)).child(context.getString(R.string.totalGames)).setValue(userInformation.getGhost().getTotalGames());
+        }
+    }
+
     public static void setUserPresencePlaying(Context context) {
         if (userInformation != null) {
             FireBaseUtils.getUserFireBaseDataBaseReference(context).child(context.getString(R.string.user_presence)).setValue(UserPresence.PLAYING);

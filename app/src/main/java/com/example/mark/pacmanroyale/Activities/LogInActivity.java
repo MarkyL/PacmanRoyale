@@ -278,8 +278,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
 
     private void initUserDefaultData() {
 
-        Ghost ghost = new Ghost(1, 1, 0, 0);
-        Pacman pacman = new Pacman(1, 1, 0, 0);
+        Ghost ghost = new Ghost(1, 1, 0, 0,0,0);
+        Pacman pacman = new Pacman(1, 1, 0, 0,0,0);
         DatabaseReference mDatabase = FireBaseUtils.getFireBaseDataBase();
         String mUserId = FirebaseAuth.getInstance().getUid();
         DatabaseReference userReference = mDatabase.child(getString(R.string.users_node)).child(mUserId);

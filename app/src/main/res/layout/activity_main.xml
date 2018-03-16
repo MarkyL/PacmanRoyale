@@ -11,8 +11,9 @@
     <ImageView
         android:id="@+id/loading_screen"
         android:layout_width="match_parent"
-        android:layout_height="566dp"
-        app:srcCompat="@drawable/pacman_right1" />
+        android:layout_height="fill_parent"
+        app:srcCompat="@drawable/app_loader"
+        android:adjustViewBounds="true"/>
 
 
 
@@ -20,7 +21,8 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" >
+        app:layout_behavior="@string/appbar_scrolling_view_behavior"
+        android:visibility="invisible">
 
     </android.support.v4.view.ViewPager>
 
@@ -30,23 +32,23 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:tabBackground="@drawable/tab_bar_background"
-        style="@style/MyTheme">
+        style="@style/MyTheme"
+        android:visibility="invisible">
 
         <android.support.design.widget.TabItem
-            android:id="@+id/tabItem"
+            android:id="@+id/skillsTab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/skills"
-            />
+            android:text="@string/skills" />
 
         <android.support.design.widget.TabItem
-            android:id="@+id/tabItem2"
+            android:id="@+id/playTab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/play" />
 
         <android.support.design.widget.TabItem
-            android:id="@+id/tabItem3"
+            android:id="@+id/settingsTab"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/settings" />

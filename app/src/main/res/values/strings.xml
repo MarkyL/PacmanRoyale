@@ -80,6 +80,12 @@
     <string name="pacmanDirection">direction</string>
     <string name="pacman_skills">pacmanSkills</string>
     <string name="invisible">invisible</string>
+    <string name="gameOver" />
+    <string name="matchOver">matchOver</string>
+    <string name="wins">wins</string>
+    <string name="losses">losses</string>
+    <string name="totalGames">totalGames</string>
+    <string name="winRatio">winRatio</string>
 
 
 </resources>

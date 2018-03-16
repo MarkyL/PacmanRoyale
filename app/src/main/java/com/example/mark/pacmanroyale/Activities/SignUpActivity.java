@@ -13,6 +13,7 @@ import android.widget.EditText;
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.User.Ghost;
 import com.example.mark.pacmanroyale.User.Pacman;
+import com.example.mark.pacmanroyale.UserPresence;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -100,19 +101,33 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
 
     private void initUserDefaultData() {
 
-        Ghost ghost = new Ghost(1,1,0,0);
-        Pacman pacman = new Pacman(1,1,0,0);
+        Ghost ghost = new Ghost(1, 1, 0, 0,0,0);
+        Pacman pacman = new Pacman(1, 1, 0, 0,0,0);
         DatabaseReference mDatabase = FireBaseUtils.getFireBaseDataBase();
         String mUserId = FirebaseAuth.getInstance().getUid();
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.level)).setValue(pacman.getLevel());
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.experience)).setValue(pacman.getExperience());
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.xPos)).setValue(pacman.getxPos());
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.yPos)).setValue(pacman.getyPos());
+        DatabaseReference userReference = mDatabase.child(getString(R.string.users_node)).child(mUserId);
+        DatabaseReference pacmanReference = userReference.child(getString(R.string.pacman_node));
+        DatabaseReference ghostReference = userReference.child(getString(R.string.ghost_node));
 
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.level)).setValue(ghost.getLevel());
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.experience)).setValue(ghost.getExperience());
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.xPos)).setValue(ghost.getxPos());
-        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.yPos)).setValue(ghost.getyPos());
+        userReference.child(getString(R.string.user_presence)).setValue(UserPresence.ONLINE);
+        pacmanReference.setValue(pacman);
+        //pacmanReference.setValue(new Pacman(1,0,-1,-1));
+        ghostReference.setValue(ghost);
+        //ghostReference.setValue(new Pacman(1,0,-1,-1));
+
+//        Ghost ghost = new Ghost(1,1,0,0,0,0);
+//        Pacman pacman = new Pacman(1,1,0,0,0,0);
+//        DatabaseReference mDatabase = FireBaseUtils.getFireBaseDataBase();
+//        String mUserId = FirebaseAuth.getInstance().getUid();
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.level)).setValue(pacman.getLevel());
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.experience)).setValue(pacman.getExperience());
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.xPos)).setValue(pacman.getxPos());
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.yPos)).setValue(pacman.getyPos());
+//
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.level)).setValue(ghost.getLevel());
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.experience)).setValue(ghost.getExperience());
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.xPos)).setValue(ghost.getxPos());
+//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.yPos)).setValue(ghost.getyPos());
 
     }
 

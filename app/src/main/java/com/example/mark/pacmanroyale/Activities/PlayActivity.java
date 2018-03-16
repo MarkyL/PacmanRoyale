@@ -1,10 +1,14 @@
 package com.example.mark.pacmanroyale.Activities;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -14,6 +18,8 @@ import android.widget.TextView;
 import com.example.mark.pacmanroyale.DrawingView;
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.R;
+import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
+import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 
 
@@ -70,7 +76,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                         Log.d(TAG, "setVisibilities() setting visibilities");
                         loaderImage.setVisibility(View.INVISIBLE);
                         surfaceView.setVisibility(View.VISIBLE);
-                        if(gameMode != GameMode.GHOST) {
+                        if (gameMode != GameMode.GHOST) {
                             invisibleButton.setVisibility(View.VISIBLE);
                             invisibleTime.setVisibility(View.VISIBLE);
                         }
@@ -79,6 +85,68 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             }
         };
         thread.start();
+    }
+
+    @Override
+    public void endGame(final boolean isPacman) {
+
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+
+                AlertDialog.Builder mBuilder = new AlertDialog.Builder(PlayActivity.this);
+                View mView = getLayoutInflater().inflate(R.layout.endgame_dialog, null);
+                TextView endGameMsg = mView.findViewById(R.id.endGameMsg);
+                Button endGameButton = mView.findViewById(R.id.endGameButton);
+
+                String winMsg = "Congratz!! You Won the game!";
+                String loseMsg = "Ohh... have a better luck next time";
+
+                if(isPacman) {
+                    if(gameMode == GameMode.PACMAN)
+                        endGameMsg.setText(winMsg);
+                    else if(gameMode == GameMode.GHOST){
+                        endGameMsg.setText(loseMsg);
+                    }
+                    else
+                        endGameMsg.setText(winMsg);
+
+                    UserInformationUtils.setUserPresenceOnline(PlayActivity.this);
+                    if(gameMode != GameMode.VS_PC) {
+                        VirtualRoomUtils.setVirtualGameRoom(null);
+                        FireBaseUtils.getFireBaseVirtualRoomReference(PlayActivity.this).removeValue();
+                    }
+                }
+                else{
+                    if(gameMode == GameMode.PACMAN)
+                        endGameMsg.setText(loseMsg);
+                    else if(gameMode == GameMode.GHOST){
+                        endGameMsg.setText(winMsg);
+                    }
+                    else
+                        endGameMsg.setText(loseMsg);
+
+                    UserInformationUtils.setUserPresenceOnline(PlayActivity.this);
+                    if(gameMode != GameMode.VS_PC) {
+                        VirtualRoomUtils.setVirtualGameRoom(null);
+                        FireBaseUtils.getFireBaseVirtualRoomReference(PlayActivity.this).removeValue();
+                    }
+                }
+
+                endGameButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        onBackPressed();
+                    }
+                });
+
+                mBuilder.setView(mView);
+                AlertDialog dialog = mBuilder.create();
+                dialog.show();
+            }
+
+        });
+
     }
 
     @Override
@@ -101,24 +169,24 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
 
     public void goInvisible(View view) {
 
-       drawingView.goInvisible(125);
-       invisibleButton.setEnabled(false);
+        drawingView.goInvisible(125);
+        invisibleButton.setEnabled(false);
 
-       new CountDownTimer(3000,100){
-           @Override
-           public void onTick(long l) {
-               int seconds = (int) (l/1000);
-               int milliSeconds = (int) (l % 1000)/100;
-               String timeLeft = String.valueOf(seconds) + "." + String.valueOf(milliSeconds);
-               invisibleTime.setText(timeLeft);
-           }
+        new CountDownTimer(3000, 100) {
+            @Override
+            public void onTick(long l) {
+                int seconds = (int) (l / 1000);
+                int milliSeconds = (int) (l % 1000) / 100;
+                String timeLeft = String.valueOf(seconds) + "." + String.valueOf(milliSeconds);
+                invisibleTime.setText(timeLeft);
+            }
 
-           @Override
-           public void onFinish() {
-               invisibleTime.setText("");
-           }
+            @Override
+            public void onFinish() {
+                invisibleTime.setText("");
+            }
 
-       }.start();
+        }.start();
 
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
@@ -134,7 +202,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             public void run() {
                 invisibleButton.setEnabled(true);
             }
-        },9000);
+        }, 12000);
 
     }
 }

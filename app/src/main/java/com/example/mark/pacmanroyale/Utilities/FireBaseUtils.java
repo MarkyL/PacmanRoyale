@@ -35,4 +35,12 @@ public class FireBaseUtils {
     public static DatabaseReference getFireBaseVirtualRoomReference(Context context) {
         return FirebaseDatabase.getInstance().getReference(context.getString(R.string.virtual_room));
     }
+
+    public static DatabaseReference getFireBasePacmanNodeReference(Context context) {
+        return FirebaseDatabase.getInstance().getReference(context.getString(R.string.users_node)).child(UserInformationUtils.getUserInformation().getUserId()).child(context.getString(R.string.pacman_node));
+    }
+
+    public static DatabaseReference getFireBaseGhostNodeReference(Context context) {
+        return FirebaseDatabase.getInstance().getReference(context.getString(R.string.users_node)).child(UserInformationUtils.getUserInformation().getUserId()).child(context.getString(R.string.ghost_node));
+    }
 }
