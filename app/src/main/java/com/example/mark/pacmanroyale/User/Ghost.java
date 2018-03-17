@@ -1,5 +1,8 @@
 package com.example.mark.pacmanroyale.User;
 
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
+
 /**
  * Created by Omri on 2/17/2018.
  */
@@ -12,7 +15,7 @@ public class Ghost {
     private int yPos;
     private int wins;
     private int totalGames;
-    private float winRatio;
+    private String winRatio;
 
     public Ghost (){
 
@@ -25,17 +28,20 @@ public class Ghost {
         this.yPos = yPos;
         this.wins = wins;
         this.totalGames = totalGames;
-        this.winRatio = 0;
+        this.winRatio = "0";
     }
 
 
-    public float getWinRatio() {
-        if(totalGames > 0)
-            return (float)wins/totalGames;
+    public String getWinRatio() {
+        if(totalGames > 0) {
+            float winRatio = (float)wins/totalGames;
+            String winRatioStr = String.format("%.2f",winRatio);
+            return winRatioStr;
+        }
         return winRatio;
     }
 
-    public void setWinRatio(float winRatio) {
+    public void setWinRatio(String winRatio) {
         this.winRatio = winRatio;
     }
 

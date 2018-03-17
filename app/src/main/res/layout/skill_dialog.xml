@@ -31,10 +31,10 @@
         android:id="@+id/skillDuration"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignEnd="@+id/description"
+        android:layout_alignParentStart="true"
         android:layout_below="@+id/description"
-        android:layout_marginEnd="75dp"
-        android:layout_marginTop="15dp"
+        android:layout_marginStart="28dp"
+        android:layout_marginTop="21dp"
         android:text="Duration: 3s"
         android:textStyle="bold|italic" />
 
@@ -42,10 +42,11 @@
         android:id="@+id/skillCoolDown"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignStart="@+id/description"
-        android:layout_alignTop="@+id/skillDuration"
-        android:layout_marginStart="79dp"
-        android:textStyle="bold|italic"
-        android:text="Cooldown: 9s" />
+        android:layout_alignBaseline="@+id/skillDuration"
+        android:layout_alignBottom="@+id/skillDuration"
+        android:layout_marginStart="22dp"
+        android:layout_toEndOf="@+id/skillDuration"
+        android:text="Cooldown: 9s"
+        android:textStyle="bold|italic" />
 
 </RelativeLayout>

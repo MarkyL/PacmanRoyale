@@ -1,5 +1,6 @@
 package com.example.mark.pacmanroyale.Tabs;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.mark.pacmanroyale.R;
@@ -24,6 +26,7 @@ public class TabGhostSkills extends Fragment {
     TextView ghostNumWins;
     TextView ghostNumGames;
     TextView ghostWinRatio;
+    Button tunnelingSkillButton;
 
     @Nullable
     @Override
@@ -32,8 +35,33 @@ public class TabGhostSkills extends Fragment {
         ghostNumWins = rootView.findViewById(R.id.ghostNumWins);
         ghostNumGames = rootView.findViewById(R.id.ghostNumGames);
         ghostWinRatio = rootView.findViewById(R.id.ghostWinRatio);
+        tunnelingSkillButton = rootView.findViewById(R.id.ghostSkillButton);
+        tunnelingSkillButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showSkill();
+            }
+        });
 
         return rootView;
+    }
+
+    private void showSkill() {
+
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
+        View mView = getLayoutInflater().inflate(R.layout.skill_dialog, null);
+        TextView description = mView.findViewById(R.id.description);
+        Button endGameButton = mView.findViewById(R.id.skillButton);
+
+        String skillDescription = "Ghosts Tunneling is forbidden!\nBUT, Sometimes they sneak in and out real quick and nobody notice - STAY ALERT!";
+        //String loseMsg = "Ohh... have a better luck next time";
+        description.setText(skillDescription);
+        endGameButton.setText("TUNNELING");
+
+
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
     }
 
     @Override

@@ -5,10 +5,17 @@
 
     <Button
         android:id="@+id/pacmanSkillButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:textColor="#000000"
+        android:textSize="17sp"
+        android:layout_width="120dp"
+        android:layout_height="55dp"
         android:layout_alignStart="@+id/winRatioTextView"
         android:layout_below="@+id/winRatioTextView"
+        android:shadowColor="#A8A8A8"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="5"
+        android:background="@drawable/orangebuttonshape"
         android:layout_marginTop="43dp"
         android:text="Invisibility" />
 
@@ -20,13 +27,17 @@
         android:layout_alignParentTop="true"
         android:layout_marginStart="13dp"
         android:layout_marginTop="73dp"
-        android:text="Wins :" />
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:text="Wins: " />
 
     <TextView
         android:id="@+id/pacmanNumWins"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_above="@+id/gamesTextView"
+        android:textSize="20sp"
+        android:textColor="@color/white"
         android:layout_toEndOf="@+id/winsTextView" />
 
     <TextView
@@ -35,7 +46,9 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/winsTextView"
         android:layout_below="@+id/winsTextView"
-        android:text="Total Games :" />
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:text="Total Games: " />
 
     <TextView
         android:id="@+id/pacmanNumGames"
@@ -44,6 +57,8 @@
         android:layout_alignBaseline="@+id/gamesTextView"
         android:layout_alignBottom="@+id/gamesTextView"
         android:layout_marginStart="25dp"
+        android:textSize="20sp"
+        android:textColor="@color/white"
         android:layout_toEndOf="@+id/winRatioTextView" />
 
     <TextView
@@ -52,13 +67,17 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@+id/gamesTextView"
         android:layout_below="@+id/gamesTextView"
-        android:text="Win Ratio:" />
+        android:textSize="20sp"
+        android:textColor="@color/white"
+        android:text="Win Ratio: " />
 
     <TextView
         android:id="@+id/pacmanWinRatio"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_below="@+id/gamesTextView"
+        android:textSize="20sp"
+        android:textColor="@color/white"
         android:layout_toEndOf="@+id/winRatioTextView" />
 
 

@@ -2,6 +2,7 @@ package com.example.mark.pacmanroyale.Tabs;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -30,7 +31,7 @@ public class TabPlay extends Fragment implements View.OnClickListener {
     private ISearchMatchInterface iViewInterface;
 
     private FrameLayout loadingLayout;
-    private LinearLayout buttonsLayout;
+    private ConstraintLayout buttonsLayout;
     private Button mCancelMatchMakingBtn;
 
     private GameMode mGameMode;
