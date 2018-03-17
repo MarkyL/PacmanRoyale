@@ -1,5 +1,6 @@
 package com.example.mark.pacmanroyale.Tabs;
 
+import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Switch;
+import android.widget.TextView;
 
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
@@ -112,6 +114,8 @@ public class TabSettings extends Fragment implements View.OnClickListener{
             } break;
             case (R.id.credits): {
 
+                showCredits();
+
             } break;
             case (R.id.logOutBtn): {
                // FirebaseAuth.getInstance().signOut();
@@ -128,5 +132,18 @@ public class TabSettings extends Fragment implements View.OnClickListener{
 
             } break;
         }
+    }
+
+    private void showCredits() {
+
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
+        View mView = getLayoutInflater().inflate(R.layout.credits_dialog, null);
+        TextView description = mView.findViewById(R.id.creditMsg);
+
+
+
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
     }
 }

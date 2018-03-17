@@ -601,12 +601,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             boolean yGhost2Cought = (yPosPacman <= yPosGhost2 + XYDelta && yPosPacman >= yPosGhost2 - XYDelta);
             boolean yGhost3Cought = (yPosPacman <= yPosGhost3 + XYDelta && yPosPacman >= yPosGhost3 - XYDelta);
 
-//            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
-//                String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
-//                Log.d(TAG, "" + gameOverMessage);
-//                // isPacman = false , means Pacman was cought by a ghost
-//                gameOver(false);
-//            }
+            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
+                String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
+                Log.d(TAG, "" + gameOverMessage);
+                // isPacman = false , means Pacman was cought by a ghost
+                gameOver(false);
+            }
 
             if (enemyBlockSize == 0) {
                 enemyBlockSize = UserInformationUtils.getEnemyBlockSize();
