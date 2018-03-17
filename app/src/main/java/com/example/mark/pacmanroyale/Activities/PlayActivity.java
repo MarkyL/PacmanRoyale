@@ -213,7 +213,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (gameMode == GameMode.PACMAN) {
+                if (gameMode != GameMode.GHOST) {
                     drawingView.goInvisible(DEFAULT_PACMAN_VISIBILTY);
                 } else if (gameMode == GameMode.GHOST) {
                     drawingView.mGoThroughTunnelEnabled = false;
