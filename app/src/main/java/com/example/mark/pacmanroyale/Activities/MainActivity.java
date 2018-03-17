@@ -96,8 +96,6 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         loadingScreen = findViewById(R.id.loading_screen);
         mTabLayout = findViewById(R.id.tabs);
 
-
-
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override

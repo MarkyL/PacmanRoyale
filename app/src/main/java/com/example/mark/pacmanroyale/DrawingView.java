@@ -103,6 +103,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     int yDistance;
 
     private float x1, x2, y1, y2;           // Initial/Final positions of swipe
+
     //private int direction = 4;              // Direction of the swipe, initial direction is right
     private int nextDirection = 4;          // Buffer for the next direction you choose
     private int viewDirection = 2;          // Direction that pacman is facing
@@ -542,6 +543,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 nextDirection = 1;
             }
         }
+    }
+
+    public void setNextDirection(int nextDirection) {
+        this.nextDirection = nextDirection;
     }
 
     @Override

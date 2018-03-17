@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="fitXY"
-        app:srcCompat="@drawable/app_logo"/>
+        app:srcCompat="@mipmap/app_logo"/>
 
     <com.example.mark.pacmanroyale.MiscDesign.SwipeableViewPager
         android:id="@+id/container"

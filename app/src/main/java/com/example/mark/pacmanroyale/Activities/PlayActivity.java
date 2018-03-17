@@ -20,6 +20,8 @@ import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 
+import io.github.controlwear.virtual.joystick.android.JoystickView;
+
 
 public class PlayActivity extends AppCompatActivity implements DrawingView.Iinterface {
 
@@ -45,6 +47,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         surfaceView = findViewById(R.id.middleSurface);
         invisibleButton = findViewById(R.id.GoInvisible);
         invisibleTime = findViewById(R.id.invisibleTime);
+        initJoyStick();
     }
 
     @Override
@@ -97,8 +100,8 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 TextView endGameMsg = mView.findViewById(R.id.endGameMsg);
                 Button endGameButton = mView.findViewById(R.id.endGameButton);
 
-                String winMsg = "Congratz!! You Won the game!";
-                String loseMsg = "Ohh... have a better luck next time";
+                String winMsg = getString(R.string.game_won);
+                String loseMsg = getString(R.string.game_lost);
 
                 if(isPacman) {
                     if(gameMode == GameMode.PACMAN)
@@ -134,7 +137,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 endGameButton.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View view) {
-                        onBackPressed();
+                        PlayActivity.super.onBackPressed();
                     }
                 });
 
@@ -142,9 +145,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 AlertDialog dialog = mBuilder.create();
                 dialog.show();
             }
-
         });
-
     }
 
     @Override
@@ -202,6 +203,31 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             }
         }, 12000);
 
+    }
+
+
+    private void initJoyStick() {
+        JoystickView joystick = findViewById(R.id.joystick);
+        joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
+            @Override
+            public void onMove(int angle, int strength) {
+                // Angles -
+                // Up 45-135 , Left 135-225 , Down 225-315 , Right 315-45
+                if (angle >= 45 && angle < 135) {
+                    Log.d(TAG, "onMove: Up");
+                    drawingView.setNextDirection(0);
+                } else if (angle >= 135 && angle < 225) {
+                    Log.d(TAG, "onMove: Left");
+                    drawingView.setNextDirection(3);
+                } else if (angle >= 225 && angle < 315) {
+                    Log.d(TAG, "onMove: Down");
+                    drawingView.setNextDirection(2);
+                } else if ((angle >= 315 && angle < 360) || (angle >= 0 && angle < 45)){
+                    Log.d(TAG, "onMove: Right");
+                    drawingView.setNextDirection(1);
+                }
+            }
+        },500);
     }
 
     @Override

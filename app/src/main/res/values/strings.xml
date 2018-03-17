@@ -94,6 +94,8 @@
     <string name="totalGames">totalGames</string>
     <string name="winRatio">winRatio</string>
     <string name="matchOver">matchOver</string>
+    <string name="game_won">Congratulations! You Won the game!</string>
+    <string name="game_lost">Ohh... better luck next time</string>
 
 
 </resources>
