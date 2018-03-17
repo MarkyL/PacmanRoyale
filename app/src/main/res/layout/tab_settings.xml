@@ -1,12 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        tools:context="com.example.mark.pacmanroyale.Activities.MainActivity$PlaceholderFragment"
-        android:gravity="center|top"
-        android:layout_marginTop="25dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.example.mark.pacmanroyale.Activities.MainActivity$PlaceholderFragment"
+    android:gravity="center|top"
+    android:layout_marginTop="25dp">
 
     <ImageView
         android:layout_width="wrap_content"
@@ -19,14 +19,18 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
+        <TextView
             android:id="@+id/joystick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/joystick"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
             android:layout_marginTop="50dp"/>
 
         <Switch
+            android:id="@+id/joystick_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="50dp"
@@ -38,14 +42,18 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/music"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/music"
-        android:layout_marginTop="25dp"/>
+        <TextView
+            android:id="@+id/music"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/music"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            android:layout_marginTop="25dp"/>
 
         <Switch
+            android:id="@+id/music_switch"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="25dp"
@@ -57,19 +65,23 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-    <Button
-        android:id="@+id/sfx"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/SFX"
-        android:layout_marginTop="25dp"/>
+        <TextView
+            android:id="@+id/sfx"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="SFX"
+            android:textColor="@color/white"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:layout_marginTop="25dp"/>
 
-    <Switch
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="25dp"
-        android:layout_marginStart="25dp"/>
-</LinearLayout>
+        <Switch
+            android:id="@+id/sfx_switch"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="25dp"
+            android:layout_marginStart="25dp"/>
+    </LinearLayout>
 
 
     <Button
@@ -91,9 +103,9 @@
         android:layout_height="wrap_content"
         android:text="V1.0"
         android:textSize="16sp"
+        android:textColor="@color/white"
         android:layout_gravity="start|bottom"
         android:layout_marginStart="10dp"
         android:layout_marginTop="30dp"/>
 
 </LinearLayout>
-

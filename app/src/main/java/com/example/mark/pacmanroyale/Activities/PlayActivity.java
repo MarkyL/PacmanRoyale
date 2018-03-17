@@ -32,7 +32,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     private static PlayActivity activity;
     private DrawingView drawingView;
     private ImageView loaderImage;
-    private Button invisibleButton;
+    private Button skillButton;
     private TextView invisibleTime;
     private TextView percentageTV;
     private GameMode gameMode;
@@ -53,9 +53,9 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         loaderImage = findViewById(R.id.play_loader);
         surfaceView = findViewById(R.id.middleSurface);
         percentageTV = findViewById(R.id.percentageTV);
-        invisibleButton = findViewById(R.id.goInvisible);
+        skillButton = findViewById(R.id.skillBtn);
         invisibleTime = findViewById(R.id.invisibleTime);
-        invisibleButton.setOnClickListener(this);
+        skillButton.setOnClickListener(this);
     }
 
     @Override
@@ -89,10 +89,16 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                         Log.d(TAG, "setVisibilities() setting visibilities");
                         loaderImage.setVisibility(View.INVISIBLE);
                         surfaceView.setVisibility(View.VISIBLE);
-                        //if (gameMode != GameMode.GHOST) {
-                            invisibleButton.setVisibility(View.VISIBLE);
-                            invisibleTime.setVisibility(View.VISIBLE);
-                        //}
+                       if (gameMode != GameMode.GHOST) {
+                           skillButton.setVisibility(View.VISIBLE);
+                           invisibleTime.setVisibility(View.VISIBLE);
+                        }
+                        else{
+                           skillButton.setText("TUNNELING");
+                           skillButton.setVisibility(View.VISIBLE);
+                           invisibleTime.setVisibility(View.VISIBLE);
+
+                       }
                     }
                 });
             }
@@ -178,12 +184,13 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     }
 
 
-    public void goInvisible() {
-        if (gameMode == GameMode.PACMAN) {
+    public void activeSkill() {
+        if (gameMode != GameMode.GHOST) {
             drawingView.goInvisible(125);
-            invisibleButton.setEnabled(false);
+            skillButton.setEnabled(false);
         } else if (gameMode == GameMode.GHOST) {
             drawingView.mGoThroughTunnelEnabled = true;
+            skillButton.setEnabled(false);
         }
 
         new CountDownTimer(3000, 100) {
@@ -218,7 +225,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                invisibleButton.setEnabled(true);
+                skillButton.setEnabled(true);
             }
         }, 12000);
 
@@ -299,8 +306,8 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     @Override
     public void onClick(View view) {
         switch (view.getId()) {
-            case (R.id.goInvisible): {
-                goInvisible();
+            case (R.id.skillBtn): {
+                activeSkill();
             } break;
         }
     }

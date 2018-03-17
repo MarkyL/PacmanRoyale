@@ -61,27 +61,31 @@
         app:JV_fixedCenter="true" />
 
     <Button
-        android:id="@+id/goInvisible"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_marginBottom="16dp"
-        android:layout_marginEnd="38dp"
-        android:text="@string/go_invisible"
+        android:id="@+id/skillBtn"
+        android:layout_width="120dp"
+        android:layout_height="55dp"
+        android:layout_below="@+id/middleSurface"
+        android:layout_marginTop="12dp"
+        android:layout_toStartOf="@+id/percentageTV"
+        android:shadowColor="#A8A8A8"
+        android:shadowDx="0"
+        android:shadowDy="0"
+        android:shadowRadius="5"
+        android:background="@drawable/orangebuttonshape"
+        android:text="@string/invisibility"
         android:visibility="invisible" />
 
     <TextView
         android:id="@+id/invisibleTime"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBottom="@+id/goInvisible"
-        android:layout_alignStart="@+id/middleSurface"
-        android:layout_marginBottom="13dp"
-        android:layout_marginStart="113dp"
-        android:visibility="invisible"
+        android:layout_alignBaseline="@+id/skillBtn"
+        android:layout_alignBottom="@+id/skillBtn"
+        android:layout_alignStart="@+id/percentageTV"
+        android:layout_marginStart="13dp"
         android:textColor="@color/mark_red"
         android:textSize="20sp"
-        android:text="@string/invisible_time" />
+        android:visibility="invisible" />
 
 
 </RelativeLayout>

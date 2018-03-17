@@ -53,7 +53,7 @@ public class TabGhostSkills extends Fragment {
         TextView description = mView.findViewById(R.id.description);
         Button endGameButton = mView.findViewById(R.id.skillButton);
 
-        String skillDescription = "Ghosts Tunneling is forbidden!\nBUT, Sometimes they sneak in and out real quick and nobody notice - STAY ALERT!";
+        String skillDescription = "Ghost Tunneling is forbidden!\nBUT, Sometimes they sneak in and out real quick and nobody notice - STAY ALERT!";
         //String loseMsg = "Ohh... have a better luck next time";
         description.setText(skillDescription);
         endGameButton.setText("TUNNELING");

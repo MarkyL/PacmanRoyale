@@ -110,6 +110,9 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         DatabaseReference ghostReference = userReference.child(getString(R.string.ghost_node));
 
         userReference.child(getString(R.string.user_presence)).setValue(UserPresence.ONLINE);
+        userReference.child(getString(R.string.music)).setValue(true);
+        userReference.child(getString(R.string.joystick)).setValue(true);
+        userReference.child(getString(R.string.SFX)).setValue(true);
         pacmanReference.setValue(pacman);
         //pacmanReference.setValue(new Pacman(1,0,-1,-1));
         ghostReference.setValue(ghost);

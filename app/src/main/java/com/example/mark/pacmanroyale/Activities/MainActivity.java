@@ -149,6 +149,8 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
 
     }
 
+
+
     // Used for sending x/y positions according to enemy's blockSize.
     // I'm setting my screen width, he will listen to this path and retrieve it
     // to convert his x/y to my x/y coordinates.

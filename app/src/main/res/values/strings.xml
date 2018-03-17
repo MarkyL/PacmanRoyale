@@ -105,6 +105,7 @@
     <string name="music">Music</string>
     <string name="joystick">Joystick</string>
     <string name="pellets_eaten">Pellets eaten :</string>
+    <string name="invisibility">Invisibility</string>
 
 
 </resources>
