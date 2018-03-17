@@ -65,6 +65,7 @@
     <string name="virtual_room">VirtualRoom</string>
     <string name="ghostWaitingList">ghostWaitingList</string>
     <string name="pacmanWaitingList">pacmanWaitingList</string>
+    <string name="pelletspercentage">PelletsPercentage</string>
 
 
     <string-array name="status_array">
@@ -96,6 +97,14 @@
     <string name="matchOver">matchOver</string>
     <string name="game_won">Congratulations! You Won the game!</string>
     <string name="game_lost">Ohh... better luck next time</string>
+    <string name="go_invisible">Go Invisible</string>
+    <string name="invisible_time">Invisible Time</string>
+    <string name="log_out">Log Out</string>
+    <string name="credits">Credits</string>
+    <string name="SFX">sfx</string>
+    <string name="music">Music</string>
+    <string name="joystick">Joystick</string>
+    <string name="pellets_eaten">Pellets eaten :</string>
 
 
 </resources>

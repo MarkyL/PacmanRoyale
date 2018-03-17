@@ -105,6 +105,11 @@ public class TabPlay extends Fragment implements View.OnClickListener {
         }
     }
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        toggleLayoutVisibilities(false);
+    }
 
     @Override
     public void onDestroy() {

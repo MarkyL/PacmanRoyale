@@ -22,7 +22,11 @@ import com.google.android.gms.tasks.Task;
 public class TabSettings extends Fragment implements View.OnClickListener{
     private static final String TAG = "TabSettings";
 
-    private Button logoutBtn;
+    private Button mLogoutBtn;
+    private Button mCreditsBtn;
+    private Button mSFXBtn;
+    private Button mMusicBtn;
+    private Button mJoystickBtn;
 
 
     @Override
@@ -30,14 +34,27 @@ public class TabSettings extends Fragment implements View.OnClickListener{
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_settings, container, false);
 
-        logoutBtn = rootView.findViewById(R.id.logOutBtn);
-        logoutBtn.setOnClickListener(this);
+        mLogoutBtn = rootView.findViewById(R.id.logOutBtn);
+        mLogoutBtn.setOnClickListener(this);
         return rootView;
     }
+
 
     @Override
     public void onClick(View view) {
         switch (view.getId()){
+            case (R.id.joystick): {
+
+            } break;
+            case (R.id.music): {
+
+            } break;
+            case (R.id.sfx): {
+
+            } break;
+            case (R.id.credits): {
+
+            } break;
             case (R.id.logOutBtn): {
                // FirebaseAuth.getInstance().signOut();
                 UserInformationUtils.setUserPresenceOffline(getContext());

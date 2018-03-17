@@ -14,6 +14,11 @@ public class UserInformation {
     //private int blocksize;
     private int screenwidth;
 
+    // for settings
+    private boolean isJoystickEnabled;
+    private boolean isMusicEnabled;
+    private boolean isSFXEnabled;
+
     private String status;
     private VirtualGameRoom virtualGameRoom;
     
@@ -64,6 +69,30 @@ public class UserInformation {
 
     public int getScreenwidth() {
         return screenwidth;
+    }
+
+    public boolean isJoystickEnabled() {
+        return isJoystickEnabled;
+    }
+
+    public void setJoystickEnabled(boolean joystickEnabled) {
+        isJoystickEnabled = joystickEnabled;
+    }
+
+    public boolean isMusicEnabled() {
+        return isMusicEnabled;
+    }
+
+    public void setMusicEnabled(boolean musicEnabled) {
+        isMusicEnabled = musicEnabled;
+    }
+
+    public boolean isSFXEnabled() {
+        return isSFXEnabled;
+    }
+
+    public void setSFXEnabled(boolean SFXEnabled) {
+        isSFXEnabled = SFXEnabled;
     }
 
     public void setScreenwidth(int screenwidth) {

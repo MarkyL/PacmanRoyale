@@ -7,6 +7,7 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,7 +24,7 @@ import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 
-public class PlayActivity extends AppCompatActivity implements DrawingView.Iinterface {
+public class PlayActivity extends AppCompatActivity implements DrawingView.Iinterface, View.OnClickListener{
 
     private static final String TAG = "PlayActivity";
     private static final String GAME_MODE = "GAME_MODE";
@@ -33,8 +34,10 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     private ImageView loaderImage;
     private Button invisibleButton;
     private TextView invisibleTime;
+    private TextView percentageTV;
     private GameMode gameMode;
 
+    float x1, y1, x2, y2;
 
     private LinearLayout surfaceView;
 
@@ -43,11 +46,16 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
         activity = this;
+        initUI();
+    }
+
+    private void initUI() {
         loaderImage = findViewById(R.id.play_loader);
         surfaceView = findViewById(R.id.middleSurface);
-        invisibleButton = findViewById(R.id.GoInvisible);
+        percentageTV = findViewById(R.id.percentageTV);
+        invisibleButton = findViewById(R.id.goInvisible);
         invisibleTime = findViewById(R.id.invisibleTime);
-        initJoyStick();
+        invisibleButton.setOnClickListener(this);
     }
 
     @Override
@@ -60,6 +68,10 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             surfaceView.addView(drawingView);
             drawingView.setCanDrawState(true);
         }
+        if (gameMode == GameMode.VS_PC) {
+            loaderImage.setVisibility(View.INVISIBLE);
+        }
+        initJoyStick();
         drawingView.resume();
     }
 
@@ -77,10 +89,10 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                         Log.d(TAG, "setVisibilities() setting visibilities");
                         loaderImage.setVisibility(View.INVISIBLE);
                         surfaceView.setVisibility(View.VISIBLE);
-                        if (gameMode != GameMode.GHOST) {
+                        //if (gameMode != GameMode.GHOST) {
                             invisibleButton.setVisibility(View.VISIBLE);
                             invisibleTime.setVisibility(View.VISIBLE);
-                        }
+                        //}
                     }
                 });
             }
@@ -166,10 +178,13 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     }
 
 
-    public void goInvisible(View view) {
-
-        drawingView.goInvisible(125);
-        invisibleButton.setEnabled(false);
+    public void goInvisible() {
+        if (gameMode == GameMode.PACMAN) {
+            drawingView.goInvisible(125);
+            invisibleButton.setEnabled(false);
+        } else if (gameMode == GameMode.GHOST) {
+            drawingView.mGoThroughTunnelEnabled = true;
+        }
 
         new CountDownTimer(3000, 100) {
             @Override
@@ -191,7 +206,11 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                drawingView.goInvisible(DEFAULT_PACMAN_VISIBILTY);
+                if (gameMode == GameMode.PACMAN) {
+                    drawingView.goInvisible(DEFAULT_PACMAN_VISIBILTY);
+                } else if (gameMode == GameMode.GHOST) {
+                    drawingView.mGoThroughTunnelEnabled = false;
+                }
             }
         }, 3000);
 
@@ -205,6 +224,35 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
 
     }
 
+    @Override
+    public void setPercentage(final String percentage) {
+        //percentageTV
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                percentageTV.setText(percentage + "%");
+            }
+        });
+    }
+
+    // Method to get touch events
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        switch (event.getAction()) {
+            case (MotionEvent.ACTION_DOWN): {
+                x1 = event.getX();
+                y1 = event.getY();
+            }
+            break;
+            case (MotionEvent.ACTION_UP): {
+                x2 = event.getX();
+                y2 = event.getY();
+                drawingView.processTouchEvent(x1, y1, x2, y2);
+            }
+            break;
+        }
+        return true;
+    }
 
     private void initJoyStick() {
         JoystickView joystick = findViewById(R.id.joystick);
@@ -213,6 +261,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             public void onMove(int angle, int strength) {
                 // Angles -
                 // Up 45-135 , Left 135-225 , Down 225-315 , Right 315-45
+                Log.d(TAG, "onMove: angle = " + angle);
                 if (angle >= 45 && angle < 135) {
                     Log.d(TAG, "onMove: Up");
                     drawingView.setNextDirection(0);
@@ -222,7 +271,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 } else if (angle >= 225 && angle < 315) {
                     Log.d(TAG, "onMove: Down");
                     drawingView.setNextDirection(2);
-                } else if ((angle >= 315 && angle < 360) || (angle >= 0 && angle < 45)){
+                } else if ((angle >= 315 && angle < 360) || (angle > 0 && angle < 45)){
                     Log.d(TAG, "onMove: Right");
                     drawingView.setNextDirection(1);
                 }
@@ -245,5 +294,14 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             AlertDialog dialog = builder.create();
             dialog.show();
 
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()) {
+            case (R.id.goInvisible): {
+                goInvisible();
+            } break;
+        }
     }
 }

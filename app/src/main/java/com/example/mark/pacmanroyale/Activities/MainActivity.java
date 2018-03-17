@@ -21,7 +21,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.mark.pacmanroyale.Enums.UserPresence;
 import com.example.mark.pacmanroyale.MiscDesign.SwipeableViewPager;
@@ -83,7 +82,6 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
     private SectionsPagerAdapter mSectionsPagerAdapter;
     private TabLayout mTabLayout;
 
-
     /**
      * The {@link ViewPager} that will host the section contents.
      */
@@ -104,7 +102,7 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
                 toggleTabsVisibility(true);
                 mSwipeAbleViewPager.setVisibility(View.VISIBLE);
             }
-        }, 5000);
+        }, 1000);
 
         printHashKey();
 
@@ -297,8 +295,6 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.tab_play, container, false);
-            TextView textView = rootView.findViewById(R.id.section_label);
-            textView.setText(getString(R.string.section_format, getArguments().getInt(ARG_SECTION_NUMBER)));
             return rootView;
         }
     }

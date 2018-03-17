@@ -6,12 +6,11 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.MediaPlayer;
 import android.os.Handler;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.Toast;
 
 import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.User.Ghost;
@@ -42,7 +41,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     private Thread mThread;
     private SurfaceHolder surfaceHolder;
-    private boolean canDraw;// = true;
+    private boolean canDraw;
 
     private Context mContext;
     private Canvas canvas;
@@ -53,7 +52,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     private Paint paint;
     private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
-    private Bitmap[] arrowRight, arrowDown, arrowLeft, arrowUp;
 
     private int currentControlledGhost = 1; // 1 is the default starting ghost.
     private int pendingControlledGhost = 1; // 1 is the default starting ghost.
@@ -71,12 +69,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private Bitmap ghost2Bitmap;
     private Bitmap ghost3Bitmap;
 
-    private int pacmanSpeed = 15;
-//    private int speedDelta;
+    private int visibility;
+    public boolean mGoThroughTunnelEnabled = false;
 
-    private int visibility ;
-
-    private int countPellets = 0;
+    private int currentPelletsAmount = 0;
+    private int totalPellets;
     private boolean isFirstTimePellet = true;
 
     private int totalFrame = 4; // amount of frames for each direction
@@ -126,13 +123,13 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private int currentScore = 0;           //Current game score
 
     final Handler handler = new Handler();
-    Runnable longPressed = new Runnable() {
-        public void run() {
-//            Log.i("info", "LongPress");
-//            Intent pauseIntent = new Intent(getContext(), MainActivity.class);
-//            getContext().startActivity(pauseIntent);
-        }
-    };
+//    Runnable longPressed = new Runnable() {
+//        public void run() {
+////            Log.i("info", "LongPress");
+////            Intent pauseIntent = new Intent(getContext(), MainActivity.class);
+////            getContext().startActivity(pauseIntent);
+//        }
+//    };
 
     private int mEnemyGhostDirection;
     private int mEnemyPacmanDirection;
@@ -194,18 +191,21 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     }
 
+    private void goThroughTunnels(boolean goThroughTunnelEnabled) {
+        mGoThroughTunnelEnabled = goThroughTunnelEnabled;
+    }
+
     public void goInvisible(int visibility){
         this.visibility = visibility;
         if(gameMode == GameMode.PACMAN)
             virtualRoomPacmanReference.child(getResources().getString(R.string.invisible)).setValue(this.visibility);
-
     }
 
     private void initGhostStartingParams() {
         xPosGhost = 8 * blockSize;
         yPosGhost = 4 * blockSize;
 
-        xPosGhost2 = 1 * blockSize;
+        xPosGhost2 = blockSize;
         yPosGhost2 = 2 * blockSize;
 
         xPosGhost3 = 16 * blockSize;
@@ -278,11 +278,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     // isPacman = true , means Pacman ate all the pellets and won
                     gameOver(true);
                 }
-//                if (mPacman != null) {
-//                    xPosPacman = mPacman.getxPos();
-//                    yPosPacman = mPacman.getyPos();
-//                    Log.d(TAG, "onDataChange() just listened to the enemy pacman!");
-//                }
             }
 
             @Override
@@ -343,29 +338,63 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         mThread = null;
     }
 
-    // Method to get touch events
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case (MotionEvent.ACTION_DOWN): {
-                x1 = event.getX();
-                y1 = event.getY();
-                handler.postDelayed(longPressed, LONG_PRESS_TIME);
-            }
-            break;
-            case (MotionEvent.ACTION_UP): {
-                if (gameMode == GameMode.GHOST) {
-                    isNewGhostSelected(event.getX(), event.getY());
-                }
-                isSwiped = true;
-                x2 = event.getX();
-                y2 = event.getY();
-                calculateSwipeDirection();
-                handler.removeCallbacks(longPressed);
-            }
-            break;
+    public void processTouchEvent(float x1, float y1, float x2, float y2){
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+
+        if (gameMode == GameMode.GHOST && !mGoThroughTunnelEnabled && !isGhostCloseToTunnel()) {
+            isNewGhostSelected(x2, y2);
         }
-        return true;
+        isSwiped = true;
+
+        calculateSwipeDirection();
+    }
+//    // Method to get touch events
+//    @Override
+//    public boolean onTouchEvent(MotionEvent event) {
+//        switch (event.getAction()) {
+//            case (MotionEvent.ACTION_DOWN): {
+//                x1 = event.getX();
+//                y1 = event.getY();
+//                //handler.postDelayed(longPressed, LONG_PRESS_TIME);
+//            }
+//            break;
+//            case (MotionEvent.ACTION_UP): {
+//                if (gameMode == GameMode.GHOST && !mGoThroughTunnelEnabled && !isGhostCloseToTunnel()) {
+//                    isNewGhostSelected(event.getX(), event.getY());
+//                }
+//                isSwiped = true;
+//                x2 = event.getX();
+//                y2 = event.getY();
+//                calculateSwipeDirection();
+//                //handler.removeCallbacks(longPressed);
+//            }
+//            break;
+//        }
+//        return true;
+//    }
+
+    private boolean isGhostCloseToTunnel() {
+        switch (currentControlledGhost) {
+            case 1: {
+                if ((xPosGhost >= 16 * blockSize || xPosGhost <= blockSize) && yPosGhost == 8 * blockSize) {
+                    return true;
+                }
+            } break;
+            case 2: {
+                if ((xPosGhost2 >= 16 * blockSize || xPosGhost2 <= blockSize) && yPosGhost2 == 8 * blockSize) {
+                    return true;
+                }
+            } break;
+            case 3: {
+                if ((xPosGhost3 >= 16 * blockSize || xPosGhost3 <= blockSize) && yPosGhost3 == 8 * blockSize) {
+                    return true;
+                }
+            } break;
+        }
+        return false;
     }
 
     private void isNewGhostSelected(float x, float y) {
@@ -376,7 +405,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if (currentControlledGhost == 1) {
                 return;
             }
-            Toast.makeText(getContext(), "Ghost 1 selected!!!", Toast.LENGTH_SHORT).show();
             pendingControlledGhost = 1;
             //moveGhostToCenterOfABlock(1);
             currentGhost1Bitmap = ghostBitmapSelected;
@@ -390,7 +418,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if (currentControlledGhost == 2) {
                 return;
             }
-            Toast.makeText(getContext(), "Ghost 2 selected!!!", Toast.LENGTH_SHORT).show();
             pendingControlledGhost = 2;
             //moveGhostToCenterOfABlock(2);
             currentGhost1Bitmap = ghost1Bitmap;
@@ -404,8 +431,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         // see if ghost 3 was selected
         if ((x + ghost3Bitmap.getWidth() + extraDelta >= xPosGhost3 && x - ghost3Bitmap.getWidth() - extraDelta <= xPosGhost3)
                 && (y + ghost3Bitmap.getHeight() + extraDelta >= yPosGhost3 && y - ghost3Bitmap.getHeight() - extraDelta <= yPosGhost3)) {
-
-            Toast.makeText(getContext(), "Ghost 3 selected!!!", Toast.LENGTH_SHORT).show();
             pendingControlledGhost = 3;
             //moveGhostToCenterOfABlock(3);
             currentGhost1Bitmap = ghost1Bitmap;
@@ -576,12 +601,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             boolean yGhost2Cought = (yPosPacman <= yPosGhost2 + XYDelta && yPosPacman >= yPosGhost2 - XYDelta);
             boolean yGhost3Cought = (yPosPacman <= yPosGhost3 + XYDelta && yPosPacman >= yPosGhost3 - XYDelta);
 
-            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
-                String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
-                Log.d(TAG, "" + gameOverMessage);
-                // isPacman = false , means Pacman was cought by a ghost
-                gameOver(false);
-            }
+//            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
+//                String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
+//                Log.d(TAG, "" + gameOverMessage);
+//                // isPacman = false , means Pacman was cought by a ghost
+//                gameOver(false);
+//            }
 
             if (enemyBlockSize == 0) {
                 enemyBlockSize = UserInformationUtils.getEnemyBlockSize();
@@ -647,6 +672,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public interface Iinterface {
         void setVisibilities();
         void endGame(boolean isPacman);
+        void setPercentage(String percentage);
     }
 
     public void initEnemyPosVariables() {
@@ -713,14 +739,14 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 // Draws pellet in the middle of a block
                 if ((leveldata1[i][j] & 16) != 0) {
                     if (isFirstTimePellet) {
-                        countPellets++;
+                        currentPelletsAmount++;
+                        totalPellets = currentPelletsAmount;
                     }
                     canvas.drawCircle(x + blockSize / 2, y + blockSize / 2, blockSize / 10, paint);
                 }
             }
         }
         isFirstTimePellet = false;
-
     }
 
     // Updates the character sprite and handles collisions
@@ -741,26 +767,32 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             // the right reappear at left tunnel
             if (charXPos >= blockSize * 17) {
                 if (gameMode == GameMode.PACMAN) {
-                    Log.d(TAG, "moveCharacter: moving pacman to left tunnel");
                     charXPos = 0;
                     xPosPacmanForEnemy = 0;
                 } else { // game mode is ghost.
-                    charXPos = blockSize * 16;
-                    xPosGhostForEnemy = enemyBlockSize * 16;
-                    //direction = 3;
+                    if (mGoThroughTunnelEnabled) { // ghost is using SKILL!
+                        charXPos = 0;
+                        ghostWentThroughTunnel(false);
+                    } else { // ghost is not using SKILL!
+                        charXPos = blockSize * 16;
+                        ghostBumpInWall(false);
+                    }
                 }
             }
             if (charXPos < 0) {
                 // When pacman goes through tunnel on
                 // the left reappear at right tunnel
                 if (gameMode == GameMode.PACMAN) {
-                    Log.d(TAG, "moveCharacter: moving pacman to right tunnel");
                     charXPos = blockSize * 16;
                     xPosPacmanForEnemy = enemyBlockSize * 16;
-                } else { // ghost remains in same spot
-                    charXPos = blockSize * 1;
-                    xPosGhostForEnemy = enemyBlockSize * 1;
-                    //direction = 1;
+                } else { // game mode is ghost.
+                    if (mGoThroughTunnelEnabled) {
+                        charXPos = blockSize * 16;
+                        ghostWentThroughTunnel(true);
+                    } else {
+                        charXPos = blockSize;
+                        ghostBumpInWall(true);
+                    }
                 }
             }
 
@@ -789,11 +821,21 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 if ((ch & 16) != 0) {
                     // Toggle pellet so it won't be drawn anymore
                     leveldata1[charYPos / blockSize][charXPos / blockSize] = (short) (ch ^ 16);
-                    if (--countPellets <= 0 && (gameMode != GameMode.GHOST)) {
+                    if (currentPelletsAmount % 5 == 0) {
+                        final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.pacman_eatfruit);
+                        mp.start();
+                    }
+                    if (--currentPelletsAmount <= 0 && (gameMode != GameMode.GHOST)) {
                         virtualRoomPacmanReference.child(getResources().getString(R.string.matchOver)).setValue(true);
                         // isPacman = true , means Pacman ate all the pellets and won
                         gameOver(true);
                     }
+                    float pelletsEatenPercentage = (float)(totalPellets - currentPelletsAmount) / totalPellets;
+                    pelletsEatenPercentage *= 100;
+                    int pelletsEatenInt = (int)pelletsEatenPercentage;
+                    //String pelletsEatenPercentageSTR = String.format("%f", pelletsEatenPercentage);
+                    myInterface.setPercentage(String.valueOf(pelletsEatenInt));
+                    virtualRoomPacmanReference.child(getResources().getString(R.string.pelletspercentage)).setValue(pelletsEatenInt);
                     currentScore += 10;
                 }
             }
@@ -813,9 +855,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             drawPacman();
         } else {
             // i'll update my direction - so the enemy can draw me on the right position as well.
-//            xPosGhost = charXPos;
-//            yPosGhost = charYPos;
-//            ghostDirection = direction;
             updateControlledGhostPositions(charXPos, charYPos, direction);
             if (enemyBlockSize != 0) {
                 moveControlledGhostPosition();
@@ -829,6 +868,34 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             canvas.drawBitmap(ghost1Bitmap, xPosGhost, yPosGhost, paint);
             drawPacman();
             drawRelevantGhostBitmap();
+        }
+    }
+
+    private void ghostBumpInWall(boolean isLeftTunnel) {
+        switch (currentControlledGhost) {
+            case 1: {
+                xPosGhostForEnemy = isLeftTunnel ? enemyBlockSize : enemyBlockSize * 16;
+            } break;
+            case 2: {
+                xPosGhost2ForEnemy = isLeftTunnel ? enemyBlockSize : enemyBlockSize * 16;
+            } break;
+            case 3: {
+                xPosGhost3ForEnemy = isLeftTunnel ? enemyBlockSize : enemyBlockSize * 16;
+            } break;
+        }
+    }
+
+    private void ghostWentThroughTunnel(boolean isLeftTunnel) {
+        switch (currentControlledGhost) {
+            case 1: {
+                xPosGhostForEnemy = isLeftTunnel ? enemyBlockSize * 16 : 0;
+            } break;
+            case 2: {
+                xPosGhost2ForEnemy = isLeftTunnel ? enemyBlockSize * 16 : 0;
+            } break;
+            case 3: {
+                xPosGhost2ForEnemy = isLeftTunnel ? enemyBlockSize * 16 : 0;
+            } break;
         }
     }
 
@@ -1052,8 +1119,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if ((ch & 16) != 0) {
                 Log.d(TAG, "movePacman: pellet eaten");
                 // Toggle pellet so it won't be drawn anymore
+                if (currentPelletsAmount % 4 == 0) {
+                    final MediaPlayer mp = MediaPlayer.create(getContext(), R.raw.pacman_eatfruit);
+                    mp.start();
+                }
                 leveldata1[yPosPacman / blockSize][xPosPacman / blockSize] = (short) (ch ^ 16);
-                if (--countPellets <= 0) {
+                if (--currentPelletsAmount <= 0) {
                     gameOver(true);
                 }
                 currentScore += 10;
@@ -1086,13 +1157,13 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
         // Depending on the direction move the position of pacman
         if (pacmanDirection == 0) {
-            yPosPacman += -blockSize / 15;
+            yPosPacman += -blockSize / PACMAN_SPEED;
         } else if (pacmanDirection == 1) {
-            xPosPacman += blockSize / 15;
+            xPosPacman += blockSize / PACMAN_SPEED;
         } else if (pacmanDirection == 2) {
-            yPosPacman += blockSize / 15;
+            yPosPacman += blockSize / PACMAN_SPEED;
         } else if (pacmanDirection == 3) {
-            xPosPacman += -blockSize / 15;
+            xPosPacman += -blockSize / PACMAN_SPEED;
         }
 
     }
@@ -1131,7 +1202,15 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         yDistance = yPosPacman - yPos;
 
         if ((xPos % blockSize == 0) && (yPos % blockSize == 0)) {
-            ch = leveldata1[yPos / blockSize][xPos / blockSize];
+            int col = yPos / blockSize;
+            int row = xPos / blockSize;
+            if (leveldata1.length < row - 1 && leveldata1[0].length < col - 1) {
+                // might need to set him to other location or else it will be stuck.
+                return;
+            }
+            Log.d(TAG, "moveGhostWithAI: leveldata.length =" +leveldata1.length + " leveldata[0].length="+leveldata1[0].length
+            + "row - 1 = " + (row-1) + " col - 1 =" + (col-1));
+            ch = leveldata1[col][row];
 
             if (xPos >= blockSize * 17) {
                 xPos = 0;
@@ -1139,7 +1218,6 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if (xPos < 0) {
                 xPos = blockSize * 17;
             }
-
 
             if (xDistance >= 0 && yDistance >= 0) { // Move right and down
                 if ((ch & 4) == 0 && (ch & 8) == 0) {
