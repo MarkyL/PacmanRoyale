@@ -178,7 +178,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             mDrawingView.goInvisible(125);
             mSkillButton.setEnabled(false);
         } else {
-            mDrawingView.mGoThroughTunnelEnabled = true;
+            mDrawingView.goThroughTunnels(true);
             mSkillButton.setEnabled(false);
         }
 
@@ -204,7 +204,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 if (mGameMode != GameMode.GHOST) {
                     mDrawingView.goInvisible(DEFAULT_PACMAN_VISIBILITY);
                 } else if (mGameMode == GameMode.GHOST) {
-                    mDrawingView.mGoThroughTunnelEnabled = false;
+                    mDrawingView.goThroughTunnels(false);
                 }
             }
         }, 3000);

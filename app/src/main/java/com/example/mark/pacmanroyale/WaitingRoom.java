@@ -119,6 +119,7 @@ public class WaitingRoom {
                 Log.d(TAG, "onDataChange() called. dataSnapshot = " + dataSnapshot.getValue());
                 if (dataSnapshot.getValue() == null) { // I think it means this node was remove - I found match myself.
                     dbWaitingListReference.removeEventListener(inviteEventListener);
+                    dbWaitingListReference.removeValue();
                     return;
                 }
                 if (dataSnapshot.getValue().equals(NULL) || !mIsMatchMakingRelevantForGhost) {
@@ -222,6 +223,7 @@ public class WaitingRoom {
                     enemyID = ghostWaitingList.get(0);
                     boolean isRemoved = ghostWaitingList.remove(enemyID);
                     Log.d(TAG, "doInBackground: isRemoved = " +isRemoved);
+                    Log.d(TAG, "doInBackground: ghost list " + (ghostWaitingList.size()>0?ghostWaitingList.get(0):"empty"));
                     retrieveEnemyBlockSize();
                     FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
                     dbWaitingListReference.removeValue();
