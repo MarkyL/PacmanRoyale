@@ -7,20 +7,14 @@
     tools:context="com.example.mark.pacmanroyale.Activities.PlayActivity"
     android:background="@color/black">
 
-
-    <ImageView
-        android:id="@+id/play_loader"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:srcCompat="@mipmap/app_logo" />
-
     <TextView
         android:id="@+id/pelletsTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="15dp"
         android:text="Pellets eaten :"
         android:textSize="20sp"
-        android:textColor="@color/mark_red"/>
+        android:textColor="#FF8800"/>
 
     <TextView
         android:id="@+id/percentageTV"
@@ -29,9 +23,8 @@
         android:layout_alignParentTop="true"
         android:layout_toEndOf="@+id/pelletsTV"
         android:layout_marginStart="10dp"
-        android:text="50%"
         android:textSize="20sp"
-        android:textColor="@color/mark_red"/>
+        android:textColor="#FF8800"/>
 
     <LinearLayout
         android:id="@+id/middleSurface"
@@ -39,21 +32,19 @@
         android:layout_height="450dp"
         android:layout_below="@+id/pelletsTV"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="14dp"
         android:background="@color/black"
-        android:orientation="vertical"
-        android:visibility="visible">
-
+        android:orientation="vertical">
     </LinearLayout>
 
     <io.github.controlwear.virtual.joystick.android.JoystickView
         android:id="@+id/joystick"
-        android:layout_width="100dp"
-        android:layout_height="100dp"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
         android:layout_alignEnd="@+id/middleSurface"
         android:layout_below="@+id/middleSurface"
-        android:layout_marginEnd="30dp"
-        app:JV_backgroundColor="#06168b"
+        android:layout_marginEnd="70dp"
+        android:layout_marginBottom="40dp"
+        app:JV_backgroundColor="#FF0000FF"
         app:JV_buttonImage="@drawable/pacman_60x60"
         app:JV_borderWidth="6dp"
         app:JV_buttonColor="#d67d1e"
@@ -73,19 +64,19 @@
         android:shadowRadius="5"
         android:background="@drawable/orangebuttonshape"
         android:text="@string/invisibility"
-        android:visibility="invisible" />
+        android:visibility="visible" />
 
     <TextView
-        android:id="@+id/invisibleTime"
+        android:id="@+id/skillTimeTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@+id/skillBtn"
-        android:layout_alignBottom="@+id/skillBtn"
-        android:layout_alignStart="@+id/percentageTV"
-        android:layout_marginStart="13dp"
-        android:textColor="@color/mark_red"
+        android:layout_alignStart="@id/skillBtn"
+        android:layout_marginStart="15dp"
+        android:layout_marginTop="10dp"
+        android:layout_below="@id/skillBtn"
+        android:textColor="#FF8800"
         android:textSize="20sp"
-        android:visibility="invisible" />
+        android:visibility="visible"/>
 
 
 </RelativeLayout>

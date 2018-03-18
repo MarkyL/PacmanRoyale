@@ -49,7 +49,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
     public void onClick(View view) {
         switch (view.getId()) {
             case (R.id.signupButton): {
-                //Toast.makeText(this, "Yet to be implemented!", Toast.LENGTH_SHORT).show();
                 beginSignUp();
             } break;
         }
@@ -95,7 +94,6 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
                             }
                         }
                     });
-
         }
     }
 
@@ -114,26 +112,8 @@ public class SignUpActivity extends AppCompatActivity implements View.OnClickLis
         userReference.child(getString(R.string.joystick)).setValue(true);
         userReference.child(getString(R.string.SFX)).setValue(true);
         pacmanReference.setValue(pacman);
-        //pacmanReference.setValue(new Pacman(1,0,-1,-1));
         ghostReference.setValue(ghost);
-        //ghostReference.setValue(new Pacman(1,0,-1,-1));
-
-//        Ghost ghost = new Ghost(1,1,0,0,0,0);
-//        Pacman pacman = new Pacman(1,1,0,0,0,0);
-//        DatabaseReference mDatabase = FireBaseUtils.getFireBaseDataBase();
-//        String mUserId = FirebaseAuth.getInstance().getUid();
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.level)).setValue(pacman.getLevel());
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.experience)).setValue(pacman.getExperience());
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.xPos)).setValue(pacman.getxPos());
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.pacman_node)).child(getString(R.string.yPos)).setValue(pacman.getyPos());
-//
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.level)).setValue(ghost.getLevel());
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.experience)).setValue(ghost.getExperience());
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.xPos)).setValue(ghost.getxPos());
-//        mDatabase.child(getString(R.string.users_node)).child(mUserId).child(getString(R.string.ghost_node)).child(getString(R.string.yPos)).setValue(ghost.getyPos());
-
     }
-
 }
 
 

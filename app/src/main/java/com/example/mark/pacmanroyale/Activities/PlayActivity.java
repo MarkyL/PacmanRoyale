@@ -7,7 +7,6 @@ import android.os.CountDownTimer;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -28,12 +27,13 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
 
     private static final String TAG = "PlayActivity";
     private static final String GAME_MODE = "GAME_MODE";
-    private static final int DEFAULT_PACMAN_VISIBILTY = 255;
+    private static final int DEFAULT_PACMAN_VISIBILITY = 255;
+
     private static PlayActivity activity;
     private DrawingView drawingView;
     private ImageView loaderImage;
     private Button skillButton;
-    private TextView invisibleTime;
+    private TextView skillTimeTV;
     private TextView percentageTV;
     private GameMode gameMode;
 
@@ -50,12 +50,15 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     }
 
     private void initUI() {
-        loaderImage = findViewById(R.id.play_loader);
+        //loaderImage = findViewById(R.id.play_loader);
         surfaceView = findViewById(R.id.middleSurface);
         percentageTV = findViewById(R.id.percentageTV);
         skillButton = findViewById(R.id.skillBtn);
-        invisibleTime = findViewById(R.id.invisibleTime);
         skillButton.setOnClickListener(this);
+        if (gameMode == GameMode.GHOST) {
+            skillButton.setText("TUNNELING");
+        }
+        skillTimeTV = findViewById(R.id.skillTimeTV);
     }
 
     @Override
@@ -69,7 +72,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             drawingView.setCanDrawState(true);
         }
         if (gameMode == GameMode.VS_PC) {
-            loaderImage.setVisibility(View.INVISIBLE);
+            //loaderImage.setVisibility(View.INVISIBLE);
         }
         initJoyStick();
         drawingView.resume();
@@ -87,16 +90,16 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                     @Override
                     public void run() {
                         Log.d(TAG, "setVisibilities() setting visibilities");
-                        loaderImage.setVisibility(View.INVISIBLE);
+                        //loaderImage.setVisibility(View.INVISIBLE);
                         surfaceView.setVisibility(View.VISIBLE);
                        if (gameMode != GameMode.GHOST) {
                            skillButton.setVisibility(View.VISIBLE);
-                           invisibleTime.setVisibility(View.VISIBLE);
+                           skillTimeTV.setVisibility(View.VISIBLE);
                         }
                         else{
                            skillButton.setText("TUNNELING");
                            skillButton.setVisibility(View.VISIBLE);
-                           invisibleTime.setVisibility(View.VISIBLE);
+                           skillTimeTV.setVisibility(View.VISIBLE);
 
                        }
                     }
@@ -188,7 +191,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         if (gameMode != GameMode.GHOST) {
             drawingView.goInvisible(125);
             skillButton.setEnabled(false);
-        } else if (gameMode == GameMode.GHOST) {
+        } else {
             drawingView.mGoThroughTunnelEnabled = true;
             skillButton.setEnabled(false);
         }
@@ -199,12 +202,12 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 int seconds = (int) (l / 1000);
                 int milliSeconds = (int) (l % 1000) / 100;
                 String timeLeft = String.valueOf(seconds) + "." + String.valueOf(milliSeconds);
-                invisibleTime.setText(timeLeft);
+                skillTimeTV.setText(timeLeft);
             }
 
             @Override
             public void onFinish() {
-                invisibleTime.setText("");
+                skillTimeTV.setText("");
             }
 
         }.start();
@@ -214,7 +217,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             @Override
             public void run() {
                 if (gameMode != GameMode.GHOST) {
-                    drawingView.goInvisible(DEFAULT_PACMAN_VISIBILTY);
+                    drawingView.goInvisible(DEFAULT_PACMAN_VISIBILITY);
                 } else if (gameMode == GameMode.GHOST) {
                     drawingView.mGoThroughTunnelEnabled = false;
                 }
@@ -242,27 +245,15 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         });
     }
 
-    // Method to get touch events
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        switch (event.getAction()) {
-            case (MotionEvent.ACTION_DOWN): {
-                x1 = event.getX();
-                y1 = event.getY();
-            }
-            break;
-            case (MotionEvent.ACTION_UP): {
-                x2 = event.getX();
-                y2 = event.getY();
-                drawingView.processTouchEvent(x1, y1, x2, y2);
-            }
-            break;
-        }
-        return true;
-    }
-
     private void initJoyStick() {
         JoystickView joystick = findViewById(R.id.joystick);
+        if (!UserInformationUtils.getUserInformation().isJoystick()) {
+            joystick.setVisibility(View.INVISIBLE);
+            return; // user did not want joyStick.
+        }
+        if (gameMode == GameMode.GHOST) {
+            joystick.setButtonDrawable(getResources().getDrawable(R.drawable.ghost_60x60));
+        }
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
             public void onMove(int angle, int strength) {

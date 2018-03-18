@@ -15,9 +15,9 @@ public class UserInformation {
     private int screenwidth;
 
     // for settings
-    private boolean isJoystickEnabled;
-    private boolean isMusicEnabled;
-    private boolean isSFXEnabled;
+    private boolean joystick;
+    private boolean music;
+    private boolean sfx;
 
     private String status;
     private VirtualGameRoom virtualGameRoom;
@@ -71,28 +71,28 @@ public class UserInformation {
         return screenwidth;
     }
 
-    public boolean isJoystickEnabled() {
-        return isJoystickEnabled;
+    public boolean isJoystick() {
+        return joystick;
     }
 
-    public void setJoystickEnabled(boolean joystickEnabled) {
-        isJoystickEnabled = joystickEnabled;
+    public void setJoystick(boolean joystick) {
+        this.joystick = joystick;
     }
 
-    public boolean isMusicEnabled() {
-        return isMusicEnabled;
+    public boolean isMusic() {
+        return music;
     }
 
-    public void setMusicEnabled(boolean musicEnabled) {
-        isMusicEnabled = musicEnabled;
+    public void setMusic(boolean music) {
+        this.music = music;
     }
 
-    public boolean isSFXEnabled() {
-        return isSFXEnabled;
+    public boolean isSfx() {
+        return sfx;
     }
 
-    public void setSFXEnabled(boolean SFXEnabled) {
-        isSFXEnabled = SFXEnabled;
+    public void setSfx(boolean sfx) {
+        this.sfx = sfx;
     }
 
     public void setScreenwidth(int screenwidth) {

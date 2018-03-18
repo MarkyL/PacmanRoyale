@@ -48,9 +48,8 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
     protected EditText emailEditText;
     protected EditText passwordEditText;
     protected Button logInButton;
-    protected Button signupButton;
+    protected Button signUpButton;
     protected SignInButton signInButton;
-
 
     protected LoginButton facebookSignUp;
     private FirebaseAuth mFirebaseAuth;
@@ -86,7 +85,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         emailEditText = findViewById(R.id.emailField);
         passwordEditText = findViewById(R.id.passwordField);
         logInButton = findViewById(R.id.loginButton);
-        signupButton = findViewById(R.id.sign_up);
+        signUpButton = findViewById(R.id.sign_up);
         facebookSignUp = findViewById(R.id.facebook_signup_btn);
         signInButton = findViewById(R.id.sign_in_button);
         signInButton.setSize(SignInButton.SIZE_STANDARD);
@@ -97,7 +96,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         facebookSignUp.setOnClickListener(this);
         facebookSignUp.setReadPermissions("email", "public_profile");
         findViewById(R.id.sign_in_button).setOnClickListener(this);
-        signupButton.setOnClickListener(this);
+        signUpButton.setOnClickListener(this);
     }
 
 
@@ -117,11 +116,7 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                         } else {
                             // If sign in fails, display a message to the user.
                             Log.w(TAG, "signInWithCredential:failure", task.getException());
-                            //Snackbar.make(findViewById(R.id.main_layout), "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-                            //updateUI(null);
                         }
-
-                        // ...
                     }
                 });
     }
@@ -237,8 +232,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
                         if (task.isSuccessful()) {
                             // Sign in success, update UI with the signed-in user's information
                             Log.d(TAG, "signInWithCredential:success");
-                            //FirebaseUser user = mFirebaseAuth.getCurrentUser();
-
                             boolean isNew = task.getResult().getAdditionalUserInfo().isNewUser();
                             Log.d(TAG, "signInWithCredential: " + (isNew ? "new user" : "old user"));
                             if (isNew) {
@@ -291,9 +284,6 @@ public class LogInActivity extends AppCompatActivity implements View.OnClickList
         userReference.child(getString(R.string.joystick)).setValue(true);
         userReference.child(getString(R.string.SFX)).setValue(true);
         pacmanReference.setValue(pacman);
-        //pacmanReference.setValue(new Pacman(1,0,-1,-1));
         ghostReference.setValue(ghost);
-        //ghostReference.setValue(new Pacman(1,0,-1,-1));
-
     }
 }

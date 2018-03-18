@@ -2,7 +2,6 @@ package com.example.mark.pacmanroyale.Tabs;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.constraint.ConstraintLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -31,9 +30,9 @@ public class TabPlay extends Fragment implements View.OnClickListener {
     private ISearchMatchInterface iViewInterface;
 
     private FrameLayout loadingLayout;
-    private ConstraintLayout buttonsLayout;
+    private LinearLayout buttonsLayout;
     private Button mCancelMatchMakingBtn;
-
+    private boolean firstLoad = true;
     private GameMode mGameMode;
 
     @Override
@@ -65,17 +64,20 @@ public class TabPlay extends Fragment implements View.OnClickListener {
                 Intent playIntent = new Intent(getContext(), PlayActivity.class);
                 playIntent.putExtra(GAME_MODE, GameMode.VS_PC);
                 startActivity(playIntent);
-            } break;
+            }
+            break;
             case (R.id.playAsPacmanBtn): {
                 loadWaitingRoomLoader();
                 mGameMode = GameMode.PACMAN;
                 WaitingRoomUtils.getWaitingRoom().beginMatchMaking(mGameMode);
-            } break;
+            }
+            break;
             case (R.id.playAsGhostBtn): {
                 loadWaitingRoomLoader();
                 mGameMode = GameMode.GHOST;
                 WaitingRoomUtils.getWaitingRoom().beginMatchMaking(mGameMode);
-            } break;
+            }
+            break;
             case (R.id.cancelMatchMakingBtn): {
                 if (mGameMode == GameMode.PACMAN) {
                     WaitingRoomUtils.getWaitingRoom().cancelPacmanGame();
@@ -86,7 +88,8 @@ public class TabPlay extends Fragment implements View.OnClickListener {
                 iViewInterface.toggleSearchingForMatch(false);
 //                iViewInterface.toggleTabsVisibility(true); // return the tabs of the main activity.
 //                iViewInterface.toggleBackPressAvailability(true);
-            } break;
+            }
+            break;
         }
     }
 
@@ -108,8 +111,13 @@ public class TabPlay extends Fragment implements View.OnClickListener {
     @Override
     public void onResume() {
         super.onResume();
-        toggleLayoutVisibilities(false);
+        if (!firstLoad) {
+            toggleLayoutVisibilities(false);
+            iViewInterface.toggleSearchingForMatch(false);
+        }
+        firstLoad = false;
     }
+
 
     @Override
     public void onDestroy() {

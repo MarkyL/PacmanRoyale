@@ -1,22 +1,20 @@
 package com.example.mark.pacmanroyale.Tabs;
 
-import android.app.AlertDialog;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Switch;
-import android.widget.TextView;
 
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
@@ -36,6 +34,7 @@ public class TabSettings extends Fragment implements View.OnClickListener{
     private Switch mMusicSwitch;
     private Switch mJoystickSwitch;
 
+    private IdestroyService idestroyService;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -57,6 +56,7 @@ public class TabSettings extends Fragment implements View.OnClickListener{
         mMusicSwitch.setOnClickListener(this);
         mJoystickSwitch.setOnClickListener(this);
 
+        idestroyService = (IdestroyService) getContext();
         return rootView;
     }
 
@@ -97,18 +97,18 @@ public class TabSettings extends Fragment implements View.OnClickListener{
         switch (view.getId()){
             case (R.id.joystick_switch): {
                boolean isChecked =  mJoystickSwitch.isChecked();
-               UserInformationUtils.getUserInformation().setJoystickEnabled(isChecked);
+               UserInformationUtils.getUserInformation().setJoystick(isChecked);
                FireBaseUtils.getUserFireBaseDataBaseReference(getContext()).child(getString(R.string.joystick)).setValue(isChecked);
             } break;
             case (R.id.music_switch): {
                 boolean isChecked =  mMusicSwitch.isChecked();
-                UserInformationUtils.getUserInformation().setJoystickEnabled(isChecked);
+                UserInformationUtils.getUserInformation().setMusic(isChecked);
                 FireBaseUtils.getUserFireBaseDataBaseReference(getContext()).child(getString(R.string.music)).setValue(isChecked);
-
+                idestroyService.handleMediaPlayerService(isChecked);
             } break;
             case (R.id.sfx_switch): {
                 boolean isChecked =  mSFXSwitch.isChecked();
-                UserInformationUtils.getUserInformation().setJoystickEnabled(isChecked);
+                UserInformationUtils.getUserInformation().setSfx(isChecked);
                 FireBaseUtils.getUserFireBaseDataBaseReference(getContext()).child(getString(R.string.SFX)).setValue(isChecked);
 
             } break;
@@ -133,17 +133,18 @@ public class TabSettings extends Fragment implements View.OnClickListener{
             } break;
         }
     }
-
     private void showCredits() {
 
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
         View mView = getLayoutInflater().inflate(R.layout.credits_dialog, null);
-        TextView description = mView.findViewById(R.id.creditMsg);
-
-
+//        TextView description = mView.findViewById(R.id.creditMsg);
 
         mBuilder.setView(mView);
         AlertDialog dialog = mBuilder.create();
         dialog.show();
+    }
+
+    public interface IdestroyService {
+        void handleMediaPlayerService(boolean shouldStart);
     }
 }

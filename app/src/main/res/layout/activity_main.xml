@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         app:tabBackground="@drawable/tab_bar_background"
-        android:visibility="gone"
+        android:visibility="invisible"
         style="@style/MyTheme">
 
         <android.support.design.widget.TabItem

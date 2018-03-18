@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
@@ -23,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.example.mark.pacmanroyale.Enums.UserPresence;
+import com.example.mark.pacmanroyale.MiscDesign.MediaPlayerService;
 import com.example.mark.pacmanroyale.MiscDesign.SwipeableViewPager;
 import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Tabs.TabPlay;
@@ -34,7 +36,6 @@ import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
 import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 import com.example.mark.pacmanroyale.WaitingRoom;
-import com.facebook.AccessToken;
 import com.facebook.login.LoginManager;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -43,44 +44,31 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.ValueEventListener;
 
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMatchInterface {
+public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMatchInterface, TabSettings.IdestroyService {
 
     private static final String TAG = "MainActivity";
-    private static final int RC_SIGN_IN = 0;
     private static final int PLAY_TAB = 1;
 
     private FirebaseAuth mFirebaseAuth;
-    private FirebaseUser mFirebaseUser;
 
-    private UserInformation userInformation;
+    private UserInformation mUserInformation;
 
-    private TabSkills tab_skills;
-    private TabPlay tab_play;
-    private TabSettings tab_settings;
+    private TabSkills mTabSkills;
+    private TabPlay mTabPlay;
+    private TabSettings mTabSettings;
+    private TabLayout mTabLayout;
 
-    //private ViewPager mViewPager;
     private SwipeableViewPager mSwipeAbleViewPager;
 
     private boolean mShouldAllowBackPress = true;
 
-    private ImageView loadingScreen;
-
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private TabLayout mTabLayout;
+    private ImageView mLoadingScreen;
+    private Intent mBackgroundIntent;
 
     /**
      * The {@link ViewPager} that will host the section contents.
@@ -91,51 +79,19 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        loadingScreen = findViewById(R.id.loading_screen);
-        mTabLayout = findViewById(R.id.tabs);
+        initUI();
+        showLoadingScreen();
+        printHashKey(); // used to facebook hash keys...
+        createSwipableActivity();
 
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                loadingScreen.setVisibility(View.GONE);
-                toggleTabsVisibility(true);
-                mSwipeAbleViewPager.setVisibility(View.VISIBLE);
-            }
-        }, 1000);
+        mTabSkills = new TabSkills();
+        mTabPlay = new TabPlay();
+        mTabSettings = new TabSettings();
 
-        printHashKey();
-
-        //Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        //setSupportActionBar(toolbar);
-        // Create the adapter that will return a fragment for each of the three
-        // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
-
-        // Set up the ViewPager with the sections adapter.
-        //mViewPager = findViewById(R.id.container);
-        mSwipeAbleViewPager = findViewById(R.id.container);
-        //mSwipeAbleViewPager.mIsSwipingEnabled = true;
-
-//        mSwipeAbleViewPager.addView(findViewById(R.id.container));
-        mSwipeAbleViewPager.setAdapter(mSectionsPagerAdapter);
-        mSwipeAbleViewPager.mIsSwipingEnabled = true;
-
-        mTabLayout = findViewById(R.id.tabs);
-
-        mSwipeAbleViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
-        mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mSwipeAbleViewPager));
-        mTabLayout.getTabAt(PLAY_TAB).select();
-
-        tab_skills = new TabSkills();
-        tab_play = new TabPlay();
-        tab_settings = new TabSettings();
-
-        boolean loggedIn = AccessToken.getCurrentAccessToken() == null;
         LoginManager.getInstance().logInWithReadPermissions(this, Arrays.asList("email","public_profile"));
 
         mFirebaseAuth = FirebaseAuth.getInstance();
-        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+        FirebaseUser mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
         if (mFirebaseUser != null) {
             // user already signed in
@@ -143,21 +99,54 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
             setScreenWidthSize();
             loadUserDetails();
             initWaitingRoom();
-        } else { // user not logged in.
+        } else{ // user not logged in.
             loadLogInView();
         }
-
-
     }
 
+    private void initUI() {
+        mLoadingScreen = findViewById(R.id.loading_screen);
+        mTabLayout = findViewById(R.id.tabs);
+        mSwipeAbleViewPager = findViewById(R.id.container);
+    }
 
+    private void showLoadingScreen() {
+        final Handler handler = new Handler();
+        handler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                mLoadingScreen.setVisibility(View.GONE);
+                toggleTabsVisibility(true);
+                mSwipeAbleViewPager.setVisibility(View.VISIBLE);
+            }
+        }, 3000);
+    }
+
+    private void createSwipableActivity() {
+        // Create the adapter that will return a fragment for each of the three
+        // primary sections of the activity.
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+
+        // Set up the ViewPager with the sections adapter.
+        mSwipeAbleViewPager.setAdapter(mSectionsPagerAdapter);
+        mSwipeAbleViewPager.mIsSwipingEnabled = true;
+        mSwipeAbleViewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(mTabLayout));
+
+        mTabLayout.addOnTabSelectedListener(new TabLayout.ViewPagerOnTabSelectedListener(mSwipeAbleViewPager));
+
+        mTabLayout.getTabAt(PLAY_TAB).select();
+    }
 
     // Used for sending x/y positions according to enemy's blockSize.
     // I'm setting my screen width, he will listen to this path and retrieve it
     // to convert his x/y to my x/y coordinates.
     private void setScreenWidthSize() {
         int screenWidth = getResources().getDisplayMetrics().widthPixels;
-        FireBaseUtils.getFireBaseDataBase().child(getString(R.string.users_node)).child(mFirebaseAuth.getUid()).child(getString(R.string.screenWidth)).setValue(screenWidth);
+        if (mFirebaseAuth.getUid() != null) {
+            FireBaseUtils.getFireBaseDataBase().child(getString(R.string.users_node))
+                    .child(mFirebaseAuth.getUid()).child(getString(R.string.screenWidth))
+                    .setValue(screenWidth);
+        }
     }
 
     // set user status to ONLINE, turn OFFLINE when he goes off.
@@ -166,30 +155,34 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         FireBaseUtils.getUserFireBaseDataBaseReference(this).child(getString(R.string.user_presence)).onDisconnect().setValue(UserPresence.OFFLINE);
     }
 
-
     // This function loads the user's details such as - ghost/pacman level and exp.
     public void loadUserDetails() {
         final String currentUserId = mFirebaseAuth.getUid();
-        userInformation = new UserInformation();
-        userInformation.setUserId(currentUserId);
-        UserInformationUtils.setUserInformation(userInformation);
-        FireBaseUtils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(currentUserId).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d(TAG, "loadUserDetails() - onDataChange ");
-                userInformation = dataSnapshot.getValue(UserInformation.class);
-                userInformation.setUserId(dataSnapshot.getKey());
-                setUserPresence();
-                UserInformationUtils.setUserInformation(userInformation);
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, "loadUserDetails() - onCancelled: " + databaseError.getMessage());
-            }
-        });
+        mUserInformation = new UserInformation();
+        mUserInformation.setUserId(currentUserId);
+        UserInformationUtils.setUserInformation(mUserInformation);
+        if (currentUserId != null) {
+            FireBaseUtils.getFireBaseDataBase().child(getResources().getString(R.string.users_node)).child(currentUserId)
+                    .addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            Log.d(TAG, "loadUserDetails() - onDataChange ");
+                            mUserInformation = dataSnapshot.getValue(UserInformation.class);
+                            mUserInformation.setUserId(dataSnapshot.getKey());
+                            setUserPresence();
+                            UserInformationUtils.setUserInformation(mUserInformation);
+                            handleMediaPlayerService(UserInformationUtils.getUserInformation().isMusic());
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            Log.d(TAG, "loadUserDetails() - onCancelled: " + databaseError.getMessage());
+                        }
+                    });
+        }
     }
 
-    // initializing the waiting room as soon as I'm in the app,
+    // Initializing the waiting room as soon as I'm in the app,
     // to load all the current waiting player lists.
     public void initWaitingRoom() {
         final WaitingRoom waitingRoom = new WaitingRoom(this);
@@ -227,22 +220,6 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         });
     }
 
-    //TODO: remove this - since we clear activity stack there is no result!!!
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        Log.d(TAG, "onActivityResult: recieving result");
-        if (requestCode == RC_SIGN_IN) {
-            if (resultCode == RESULT_OK) {
-                // user logged in
-                Log.d(TAG,"user logged in : " + FirebaseAuth.getInstance().getCurrentUser().getEmail());
-            }
-        } else {
-            // User not authenticated
-            Log.d(TAG, "Not Authenticated");
-        }
-    }
-
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -250,13 +227,15 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         if (VirtualRoomUtils.getVirtualRoomReference() != null) { // in case disconnect is late to work.
             VirtualRoomUtils.getVirtualRoomReference().removeValue();
         }
+        if (mBackgroundIntent != null) {
+            stopService(mBackgroundIntent);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         UserInformationUtils.setUserPresenceOnline(this);
-        toggleBackPressAvailability(true);
     }
 
     public void toggleTabsVisibility(boolean isTabsShown) {
@@ -265,6 +244,18 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
                 mTabLayout.setVisibility(View.VISIBLE);
             } else {
                 mTabLayout.setVisibility(View.INVISIBLE);
+            }
+        }
+    }
+
+    @Override
+    public void handleMediaPlayerService(boolean shouldStart) {
+        if (shouldStart) {
+            mBackgroundIntent = new Intent(this, MediaPlayerService.class);
+            startService(mBackgroundIntent);
+        } else { // i need to stop.
+            if (mBackgroundIntent != null) {
+                stopService(mBackgroundIntent);
             }
         }
     }
@@ -295,7 +286,7 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
         }
 
         @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+        public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.tab_play, container, false);
             return rootView;
@@ -313,8 +304,6 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
                     String hashKey = new String(Base64.encode(md.digest(), 0));
                     Log.i(TAG, "printHashKey() Hash Key: " + hashKey);
                 }
-            } catch (NoSuchAlgorithmException e) {
-                Log.e(TAG, "printHashKey()", e);
             } catch (Exception e) {
                 Log.e(TAG, "printHashKey()", e);
             }
@@ -342,9 +331,8 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
                     .setNegativeButton(R.string.cancel, null);
             AlertDialog dialog = builder.create();
             dialog.show();
-        } else {
-            // do nothing.
         }
+        // else do nothing... consume.
     }
 
     public void toggleBackPressAvailability(boolean isActive) {
@@ -370,7 +358,7 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        public SectionsPagerAdapter(FragmentManager fm) {
+        SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
 
@@ -380,13 +368,13 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
             // Return a PlaceholderFragment (defined as a static inner class below).
             switch (position) {
                 case 0: {
-                    return tab_skills;
+                    return mTabSkills;
                 }
                 case 1: {
-                    return tab_play;
+                    return mTabPlay;
                 }
                 case 2: {
-                    return tab_settings;
+                    return mTabSettings;
                 }
                 default:
                     return null;

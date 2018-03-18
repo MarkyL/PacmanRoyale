@@ -66,7 +66,9 @@
     <string name="ghostWaitingList">ghostWaitingList</string>
     <string name="pacmanWaitingList">pacmanWaitingList</string>
     <string name="pelletspercentage">PelletsPercentage</string>
-
+    <string name="SFX">sfx</string>
+    <string name="music">music</string>
+    <string name="joystick">joystick</string>
 
     <string-array name="status_array">
         <item><string name="online">Online</string></item>
@@ -101,11 +103,17 @@
     <string name="invisible_time">Invisible Time</string>
     <string name="log_out">Log Out</string>
     <string name="credits">Credits</string>
-    <string name="SFX">sfx</string>
-    <string name="music">Music</string>
-    <string name="joystick">Joystick</string>
+
     <string name="pellets_eaten">Pellets eaten :</string>
+    <string name="zero_percent">0%</string>
     <string name="invisibility">Invisibility</string>
 
+    <string name="credits_msg">Design: Ayelet Raphaeli \n
+        <a href="www.google.com">www.Ayelet-Raphaeli.com</a> \n\n
+        Consultancy: Perry Shalom \n\n
+        Development: \n
+        Mark Lurie \u0020 \u0020 \u0020 \u0020 Omri Ohayon
+
+    </string>
 
 </resources>
