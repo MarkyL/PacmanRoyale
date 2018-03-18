@@ -11,7 +11,6 @@ import com.google.firebase.database.FirebaseDatabase;
  */
 
 public class FireBaseUtils {
-    private static final String TAG = "FireBaseUtils";
 
     public static DatabaseReference getFireBaseDataBase(){
         return FirebaseDatabase.getInstance().getReference();

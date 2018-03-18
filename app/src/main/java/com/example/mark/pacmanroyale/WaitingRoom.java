@@ -22,6 +22,12 @@ import static com.example.mark.pacmanroyale.DrawingView.BLOCK_SIZE_DIVIDER;
 
 /**
  * Created by Mark on 21/02/2018.
+ *
+ * Waiting room contains infrastructure for future implementation of
+ * queue line up of players, choosing the highest priority player
+ * and management of the stacks.
+ * therefore, there are methods/fields which are unused but are
+ * necessary for this future implementations.
  */
 
 public class WaitingRoom {
@@ -39,51 +45,21 @@ public class WaitingRoom {
 
     private boolean foundMatch;
     private VirtualGameRoom gameRoom;
-    private int myPositionInWaitingList;
-    private boolean amInvited;
     private ValueEventListener inviteEventListener;
-    private Thread mThread;
 
-    public FindAMatchAsyncTask mAsyncTask;
+    private FindAMatchAsyncTask mAsyncTask;
     DatabaseReference dbWaitingListReference;
     private boolean mIsMatchMakingRelevantForGhost = false;
     private boolean mIsMatchMakingRelevantForPacman = false;
 
+    /* TODO: Future implementation */
+    private int myPositionInWaitingList;
+    private boolean amInvited;
+    private Thread mThread;
+
     public WaitingRoom(Context context) {
         this.context = context;
         this.userID = UserInformationUtils.getUserInformation().getUserId();
-    }
-
-    public void addPacmanPlayer(String userID) {
-        pacmanWaitingList.add(userID);
-        myPositionInWaitingList = pacmanWaitingList.size() - 1;
-    }
-
-    public String getPacmanPlayer() {
-        if (pacmanWaitingList != null && pacmanWaitingList.size() > 0) {
-            return pacmanWaitingList.remove(0);
-        }
-        return null;
-    }
-
-    public ArrayList<String> getPacmanWaitingList() {
-        return pacmanWaitingList;
-    }
-
-    public void addGhostPlayer(String userID) {
-        ghostWaitingList.add(userID);
-        myPositionInWaitingList = ghostWaitingList.size() - 1;
-    }
-
-    public String getGhostPlayer() {
-        if (ghostWaitingList != null && ghostWaitingList.size() > 0) {
-            return ghostWaitingList.remove(0);
-        }
-        return null;
-    }
-
-    public ArrayList<String> getGhostWaitingList() {
-        return ghostWaitingList;
     }
 
     public void setPacmanWaitingList(ArrayList<String> pacmanWaitingList) {
@@ -106,7 +82,6 @@ public class WaitingRoom {
                 dbWaitingListReference = FireBaseUtils.getFireBasePacmanWaitingList(context).child(userID);
                 dbWaitingListReference.setValue(NULL);
                 dbWaitingListReference.onDisconnect().removeValue();
-                // the following while loop should be written in a separate function - searchForMatch()
                 mAsyncTask = new FindAMatchAsyncTask(dbWaitingListReference);
                 mAsyncTask.execute();
             }
@@ -120,15 +95,11 @@ public class WaitingRoom {
                 listenToInvites(dbWaitingListReference);
             }
             break;
-            case QUICK_MATCH: {
+            case QUICK_MATCH: { // FUTURE IMPLEMENTATIONS
 
             }
             break;
-
         }
-    }
-
-    private void createGameRoomInFireBase() {
     }
 
     private void initArrayListsIfNeeded() {
@@ -194,7 +165,7 @@ public class WaitingRoom {
         pacmanWaitingList.remove(userID);
     }
 
-    public void cancelAsyncTask() {
+    private void cancelAsyncTask() {
         if (mAsyncTask != null) {
             mAsyncTask.cancel(true);
             mIsMatchMakingRelevantForPacman = false;
@@ -209,7 +180,7 @@ public class WaitingRoom {
         ghostWaitingList.remove(userID);
     }
 
-    public void cancelListenToInvites() {
+    private void cancelListenToInvites() {
         if (dbWaitingListReference != null && inviteEventListener != null) {
             dbWaitingListReference.removeEventListener(inviteEventListener);
             mIsMatchMakingRelevantForGhost = false;
@@ -232,18 +203,13 @@ public class WaitingRoom {
                 @Override
                 public void onCancelled(DatabaseError databaseError) {}
             });
-        //}
     }
-
-    public void setUpVirtualRoom() {
-        }
-
 
     private class FindAMatchAsyncTask extends AsyncTask<String, Integer, String> {
         private static final String TAG = "FindAMatchAsyncTask";
 
         final DatabaseReference dbWaitingListReference;
-        public FindAMatchAsyncTask(final DatabaseReference dbWaitingListReference) {
+        FindAMatchAsyncTask(final DatabaseReference dbWaitingListReference) {
             this.dbWaitingListReference = dbWaitingListReference;
         }
 
@@ -254,12 +220,14 @@ public class WaitingRoom {
                 if (ghostWaitingList.size() > 0) { // I found someone to play with
                     foundMatch = true;
                     enemyID = ghostWaitingList.get(0);
+                    boolean isRemoved = ghostWaitingList.remove(enemyID);
+                    Log.d(TAG, "doInBackground: isRemoved = " +isRemoved);
                     retrieveEnemyBlockSize();
                     FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
                     dbWaitingListReference.removeValue();
                     gameRoom = new VirtualGameRoom(userID, enemyID, true);
                     VirtualRoomUtils.setVirtualGameRoom(gameRoom);
-                    createGameRoomInFireBase();
+                    //createGameRoomInFireBase();
                     Log.d(TAG, "doInBackground() finished - found a match!");
                 }
             }
@@ -289,6 +257,45 @@ public class WaitingRoom {
         protected void onProgressUpdate(Integer... values) {
            // Log.d(TAG, "onProgressUpdate() still looking for match");
         }
+    }
+
+    /* TODO: future implementation infrastructure. */
+    public void addPacmanPlayer(String userID) {
+        pacmanWaitingList.add(userID);
+        myPositionInWaitingList = pacmanWaitingList.size() - 1;
+    }
+
+    public String getPacmanPlayer() {
+        if (pacmanWaitingList != null && pacmanWaitingList.size() > 0) {
+            return pacmanWaitingList.remove(0);
+        }
+        return null;
+    }
+
+    public ArrayList<String> getPacmanWaitingList() {
+        return pacmanWaitingList;
+    }
+
+    public void addGhostPlayer(String userID) {
+        ghostWaitingList.add(userID);
+        myPositionInWaitingList = ghostWaitingList.size() - 1;
+    }
+
+    public String getGhostPlayer() {
+        if (ghostWaitingList != null && ghostWaitingList.size() > 0) {
+            return ghostWaitingList.remove(0);
+        }
+        return null;
+    }
+
+    public ArrayList<String> getGhostWaitingList() {
+        return ghostWaitingList;
+    }
+
+    public void setUpVirtualRoom() {
+    }
+
+    private void createGameRoomInFireBase() {
     }
 }
 

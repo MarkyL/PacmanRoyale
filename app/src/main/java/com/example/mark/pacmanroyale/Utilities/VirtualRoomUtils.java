@@ -8,7 +8,6 @@ import com.google.firebase.database.DatabaseReference;
  */
 
 public class VirtualRoomUtils {
-    private static final String TAG = "VirtualRoomUtils";
 
     private static DatabaseReference virtualRoomReference;
 

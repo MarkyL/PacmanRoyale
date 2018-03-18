@@ -41,30 +41,30 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private static final int PACMAN_SPEED = 10;
 
     private Thread mThread;
-    private SurfaceHolder surfaceHolder;
+    private SurfaceHolder mSurfaceHolder;
     private boolean canDraw;
 
     private Context mContext;
-    private Canvas canvas;
+    private Canvas mCanvas;
 
-    private DatabaseReference virtualRoomReference;
+    private DatabaseReference mVirtualRoomReference;
     private DatabaseReference virtualRoomGhostReference;
     private DatabaseReference virtualRoomPacmanReference;
 
-    private Paint paint;
-    private Bitmap[] pacmanRight, pacmanDown, pacmanLeft, pacmanUp;
+    private Paint mPaint;
+    private Bitmap[] mPacmanRight, mPacmanDown, mPacmanLeft, mPacmanUp;
 
     private int currentControlledGhost = 1; // 1 is the default starting ghost.
     private int pendingControlledGhost = 1; // 1 is the default starting ghost.
-    private boolean ghostControlChanged = false;
+    private boolean mGhostControlChanged = false;
 
-    private Bitmap ghost1Bitmap;
-    private Bitmap ghostBitmapSelected;
-    private Bitmap ghost2BitmapSelected;
-    private Bitmap ghost3BitmapSelected;
+    private Bitmap mGhost1Bitmap;
+    private Bitmap mGhostBitmapSelected;
+    private Bitmap mGhost2BitmapSelected;
+    private Bitmap mGhost3BitmapSelected;
 
-    private Bitmap currentGhost1Bitmap;
-    private Bitmap currentGhost2Bitmap;
+    private Bitmap mCurrentGhost1Bitmap;
+    private Bitmap mCurrentGhost2Bitmap;
     private Bitmap currentGhost3Bitmap;
 
     private Bitmap ghost2Bitmap;
@@ -160,11 +160,11 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public DrawingView(Context context, GameMode gameMode) {
         super(context);
         this.mContext =context;
-        surfaceHolder = getHolder();
-        surfaceHolder.addCallback(this);
+        mSurfaceHolder = getHolder();
+        mSurfaceHolder.addCallback(this);
         frameTicker = 1000 / totalFrame;
-        paint = new Paint();
-        paint.setColor(Color.WHITE);
+        mPaint = new Paint();
+        mPaint.setColor(Color.WHITE);
         screenWidth = getResources().getDisplayMetrics().widthPixels;
         blockSize = screenWidth / BLOCK_SIZE_DIVIDER;
         blockSize = (blockSize / 5) * 5;
@@ -179,9 +179,9 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         yPosPacman = 13 * blockSize;
 
         if (gameMode == GameMode.GHOST || gameMode == GameMode.PACMAN) {
-            virtualRoomReference = VirtualRoomUtils.getVirtualRoomReference();
-            virtualRoomGhostReference = virtualRoomReference.child(getResources().getString(R.string.ghost_node));
-            virtualRoomPacmanReference = virtualRoomReference.child(getResources().getString(R.string.pacman_node));
+            mVirtualRoomReference = VirtualRoomUtils.getVirtualRoomReference();
+            virtualRoomGhostReference = mVirtualRoomReference.child(getResources().getString(R.string.ghost_node));
+            virtualRoomPacmanReference = mVirtualRoomReference.child(getResources().getString(R.string.pacman_node));
         }
             if (gameMode == GameMode.PACMAN) {
                 listenToGhostPosOnFireBase();
@@ -400,17 +400,17 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private void isNewGhostSelected(float x, float y) {
         final int extraDelta = 10;
         // see if ghost 1 was selected
-        if ((x + ghost1Bitmap.getWidth() + extraDelta >= xPosGhost && x - ghost1Bitmap.getWidth() - extraDelta <= xPosGhost)
-                && (y + ghost1Bitmap.getHeight() + extraDelta >= yPosGhost && y - ghost1Bitmap.getHeight() - extraDelta <= yPosGhost)) {
+        if ((x + mGhost1Bitmap.getWidth() + extraDelta >= xPosGhost && x - mGhost1Bitmap.getWidth() - extraDelta <= xPosGhost)
+                && (y + mGhost1Bitmap.getHeight() + extraDelta >= yPosGhost && y - mGhost1Bitmap.getHeight() - extraDelta <= yPosGhost)) {
             if (currentControlledGhost == 1) {
                 return;
             }
             pendingControlledGhost = 1;
             //moveGhostToCenterOfABlock(1);
-            currentGhost1Bitmap = ghostBitmapSelected;
-            currentGhost2Bitmap = ghost2Bitmap;
+            mCurrentGhost1Bitmap = mGhostBitmapSelected;
+            mCurrentGhost2Bitmap = ghost2Bitmap;
             currentGhost3Bitmap = ghost3Bitmap;
-            ghostControlChanged = true;
+            mGhostControlChanged = true;
         }
         // see if ghost 2 was selected
         if ((x + ghost2Bitmap.getWidth() + extraDelta >= xPosGhost2 && x - ghost2Bitmap.getWidth() - extraDelta <= xPosGhost2)
@@ -420,10 +420,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             }
             pendingControlledGhost = 2;
             //moveGhostToCenterOfABlock(2);
-            currentGhost1Bitmap = ghost1Bitmap;
-            currentGhost2Bitmap = ghost2BitmapSelected;
+            mCurrentGhost1Bitmap = mGhost1Bitmap;
+            mCurrentGhost2Bitmap = mGhost2BitmapSelected;
             currentGhost3Bitmap = ghost3Bitmap;
-            ghostControlChanged = true;
+            mGhostControlChanged = true;
         }
         if (currentControlledGhost == 3) {
             return;
@@ -433,10 +433,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                 && (y + ghost3Bitmap.getHeight() + extraDelta >= yPosGhost3 && y - ghost3Bitmap.getHeight() - extraDelta <= yPosGhost3)) {
             pendingControlledGhost = 3;
             //moveGhostToCenterOfABlock(3);
-            currentGhost1Bitmap = ghost1Bitmap;
-            currentGhost2Bitmap = ghost2Bitmap;
-            currentGhost3Bitmap = ghost3BitmapSelected;
-            ghostControlChanged = true;
+            mCurrentGhost1Bitmap = mGhost1Bitmap;
+            mCurrentGhost2Bitmap = ghost2Bitmap;
+            currentGhost3Bitmap = mGhost3BitmapSelected;
+            mGhostControlChanged = true;
         }
     }
 
@@ -584,7 +584,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
-            if (!surfaceHolder.getSurface().isValid()) {
+            if (!mSurfaceHolder.getSurface().isValid()) {
                 continue; // need to check what it does - and why/do we need it.
             }
 
@@ -601,12 +601,12 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             boolean yGhost2Cought = (yPosPacman <= yPosGhost2 + XYDelta && yPosPacman >= yPosGhost2 - XYDelta);
             boolean yGhost3Cought = (yPosPacman <= yPosGhost3 + XYDelta && yPosPacman >= yPosGhost3 - XYDelta);
 
-//            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
-//                String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
-//                Log.d(TAG, "" + gameOverMessage);
-//                // isPacman = false , means Pacman was cought by a ghost
-//                gameOver(false);
-//            }
+            if (((xGhostCought && yGhostCought) || (xGhost2Cought && yGhost2Cought) || (xGhost3Cought && yGhost3Cought)) && (visibility == DEFAULT_VISIBILITY)) {
+                String gameOverMessage = gameMode == GameMode.PACMAN ? "Game Over!" : "Well Played Ghost!";
+                Log.d(TAG, "" + gameOverMessage);
+                // isPacman = false , means Pacman was cought by a ghost
+                gameOver(false);
+            }
 
             if (enemyBlockSize == 0) {
                 enemyBlockSize = UserInformationUtils.getEnemyBlockSize();
@@ -615,10 +615,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                     initEnemyPosVariables();
                 }
             }
-            canvas = surfaceHolder.lockCanvas();
+            mCanvas = mSurfaceHolder.lockCanvas();
             // Set background color to Transparent
-            if (canvas != null) {
-                canvas.drawColor(Color.BLACK);
+            if (mCanvas != null) {
+                mCanvas.drawColor(Color.BLACK);
 
                 drawMap();
 
@@ -644,8 +644,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                         }
                     }
                 } else {
-                    moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, currentGhost1Bitmap);
-                    moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, currentGhost2Bitmap);
+                    moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, mCurrentGhost1Bitmap);
+                    moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, mCurrentGhost2Bitmap);
                     moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, currentGhost3Bitmap);
                     // Moves the pacman based on his direction
                     movePacman();
@@ -658,7 +658,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
                 //updatePositionsToDB();
 
-                surfaceHolder.unlockCanvasAndPost(canvas);
+                mSurfaceHolder.unlockCanvasAndPost(mCanvas);
 
                 if (firstTime) {
                     firstTime = false;
@@ -742,7 +742,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
                         currentPelletsAmount++;
                         totalPellets = currentPelletsAmount;
                     }
-                    canvas.drawCircle(x + blockSize / 2, y + blockSize / 2, blockSize / 10, paint);
+                    mCanvas.drawCircle(x + blockSize / 2, y + blockSize / 2, blockSize / 10, mPaint);
                 }
             }
         }
@@ -753,8 +753,8 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     public void moveCharacter(int charXPos, int charYPos, int direction) {
         short ch;
 
-        if (gameMode == GameMode.GHOST && ghostControlChanged) {
-            ghostControlChanged = false;
+        if (gameMode == GameMode.GHOST && mGhostControlChanged) {
+            mGhostControlChanged = false;
             setCurrentControlledGhost();
             //moveGhostToCenterOfABlock(currentControlledGhost);
             return;
@@ -848,9 +848,9 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if (enemyBlockSize != 0) {
                 updatePacmanPositions();
             }
-            canvas.drawBitmap(ghost1Bitmap, xPosGhost, yPosGhost, paint);
-            canvas.drawBitmap(ghost2Bitmap, xPosGhost2, yPosGhost2, paint);
-            canvas.drawBitmap(ghost3Bitmap, xPosGhost3, yPosGhost3, paint);
+            mCanvas.drawBitmap(mGhost1Bitmap, xPosGhost, yPosGhost, mPaint);
+            mCanvas.drawBitmap(ghost2Bitmap, xPosGhost2, yPosGhost2, mPaint);
+            mCanvas.drawBitmap(ghost3Bitmap, xPosGhost3, yPosGhost3, mPaint);
             drawPacman();
         } else {
             // i'll update my direction - so the enemy can draw me on the right position as well.
@@ -861,10 +861,10 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             if (isSwiped) {
                 moveUncontrolledGhostsWithAI();
             } else {
-                canvas.drawBitmap(ghost2Bitmap, xPosGhost2, yPosGhost2, paint);
-                canvas.drawBitmap(ghost3Bitmap, xPosGhost3, yPosGhost3, paint);
+                mCanvas.drawBitmap(ghost2Bitmap, xPosGhost2, yPosGhost2, mPaint);
+                mCanvas.drawBitmap(ghost3Bitmap, xPosGhost3, yPosGhost3, mPaint);
             }
-            canvas.drawBitmap(ghost1Bitmap, xPosGhost, yPosGhost, paint);
+            mCanvas.drawBitmap(mGhost1Bitmap, xPosGhost, yPosGhost, mPaint);
             drawPacman();
             drawRelevantGhostBitmap();
         }
@@ -1040,18 +1040,18 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private void moveUncontrolledGhostsWithAI() {
         switch (currentControlledGhost) {
             case 1: { // I control ghost #1 , need to move with AI ghosts #2 & #3
-                moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, currentGhost2Bitmap);
+                moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, mCurrentGhost2Bitmap);
                 moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, currentGhost3Bitmap);
             }
             break;
             case 2: { // I control ghost #2 , need to move with AI ghosts #1 & #3
-                moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, currentGhost1Bitmap);
+                moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, mCurrentGhost1Bitmap);
                 moveGhostWithAI(xPosGhost3, yPosGhost3, ghost3Direction, GHOST3_SPEED, 3, currentGhost3Bitmap);
             }
             break;
             case 3: { // I control ghost #3 , need to move with AI ghosts #1 & #2
-                moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, currentGhost1Bitmap);
-                moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, currentGhost2Bitmap);
+                moveGhostWithAI(xPosGhost, yPosGhost, ghostDirection, GHOST1_SPEED, 1, mCurrentGhost1Bitmap);
+                moveGhostWithAI(xPosGhost2, yPosGhost2, ghost2Direction, GHOST2_SPEED, 2, mCurrentGhost2Bitmap);
             }
             break;
         }
@@ -1060,15 +1060,15 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
     private void drawRelevantGhostBitmap() {
         switch (currentControlledGhost) {
             case 1: {
-                canvas.drawBitmap(currentGhost1Bitmap, xPosGhost, yPosGhost, paint);
+                mCanvas.drawBitmap(mCurrentGhost1Bitmap, xPosGhost, yPosGhost, mPaint);
             }
             break;
             case 2: {
-                canvas.drawBitmap(currentGhost2Bitmap, xPosGhost2, yPosGhost2, paint);
+                mCanvas.drawBitmap(mCurrentGhost2Bitmap, xPosGhost2, yPosGhost2, mPaint);
             }
             break;
             case 3: {
-                canvas.drawBitmap(currentGhost3Bitmap, xPosGhost3, yPosGhost3, paint);
+                mCanvas.drawBitmap(currentGhost3Bitmap, xPosGhost3, yPosGhost3, mPaint);
             }
             break;
         }
@@ -1178,22 +1178,22 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         } else {
             theView = viewDirection;
         }
-        paint.setAlpha(visibility);
+        mPaint.setAlpha(visibility);
         switch (theView) {
             case (0):
-                canvas.drawBitmap(pacmanUp[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                mCanvas.drawBitmap(mPacmanUp[currentPacmanFrame], xPosPacman, yPosPacman, mPaint);
                 break;
             case (1):
-                canvas.drawBitmap(pacmanRight[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                mCanvas.drawBitmap(mPacmanRight[currentPacmanFrame], xPosPacman, yPosPacman, mPaint);
                 break;
             case (3):
-                canvas.drawBitmap(pacmanLeft[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                mCanvas.drawBitmap(mPacmanLeft[currentPacmanFrame], xPosPacman, yPosPacman, mPaint);
                 break;
             default:
-                canvas.drawBitmap(pacmanDown[currentPacmanFrame], xPosPacman, yPosPacman, paint);
+                mCanvas.drawBitmap(mPacmanDown[currentPacmanFrame], xPosPacman, yPosPacman, mPaint);
                 break;
         }
-        paint.setAlpha(DEFAULT_VISIBILITY);
+        mPaint.setAlpha(DEFAULT_VISIBILITY);
     }
 
     private void moveGhostWithAI(int xPos, int yPos, int currentGhostDirection, final int ghostSpeed, int ghostNumber, Bitmap ghostResource) {
@@ -1305,7 +1305,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 //            }
 //            break;
 //        }
-        canvas.drawBitmap(ghostResource, xPos, yPos, paint);
+        mCanvas.drawBitmap(ghostResource, xPos, yPos, mPaint);
     }
 
     private void updateAIGhostPositions(int xPos, int yPos, int currentGhostDirection, int ghostSpeed, int ghostNumber) {
@@ -1420,7 +1420,7 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
             xPos += -blockSize / 20;
         }
 
-        canvas.drawBitmap(ghostBitMap, xPos, yPos, paint);
+        mCanvas.drawBitmap(ghostBitMap, xPos, yPos, mPaint);
 
         if (ghostNumber == 2) {
             xPosGhost2 = xPos;
@@ -1453,28 +1453,28 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
 
     // Method to draw map layout
     private void drawMap() {
-        paint.setColor(Color.BLUE);
-        paint.setStrokeWidth(2.5f);
+        mPaint.setColor(Color.BLUE);
+        mPaint.setStrokeWidth(2.5f);
         int x, y;
         for (int i = 0; i < 18; i++) {
             for (int j = 0; j < 17; j++) {
                 x = j * blockSize;
                 y = i * blockSize;
                 if ((leveldata1[i][j] & 1) != 0) // draws left
-                    canvas.drawLine(x, y, x, y + blockSize - 1, paint);
+                    mCanvas.drawLine(x, y, x, y + blockSize - 1, mPaint);
 
                 if ((leveldata1[i][j] & 2) != 0) // draws top
-                    canvas.drawLine(x, y, x + blockSize - 1, y, paint);
+                    mCanvas.drawLine(x, y, x + blockSize - 1, y, mPaint);
 
                 if ((leveldata1[i][j] & 4) != 0) // draws right
-                    canvas.drawLine(
-                            x + blockSize, y, x + blockSize, y + blockSize - 1, paint);
+                    mCanvas.drawLine(
+                            x + blockSize, y, x + blockSize, y + blockSize - 1, mPaint);
                 if ((leveldata1[i][j] & 8) != 0) // draws bottom
-                    canvas.drawLine(
-                            x, y + blockSize, x + blockSize - 1, y + blockSize, paint);
+                    mCanvas.drawLine(
+                            x, y + blockSize, x + blockSize - 1, y + blockSize, mPaint);
             }
         }
-        paint.setColor(Color.WHITE);
+        mPaint.setColor(Color.WHITE);
     }
 
     private void loadBitmapImages() {
@@ -1484,70 +1484,70 @@ public class DrawingView extends SurfaceView implements Runnable, SurfaceHolder.
         int arrowSize = 7 * blockSize;            // Size of arrow indicators
 
         // Add bitmap images of pacman facing right
-        pacmanRight = new Bitmap[totalFrame];
-        pacmanRight[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanRight = new Bitmap[totalFrame];
+        mPacmanRight[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_right1), spriteSize, spriteSize, false);
-        pacmanRight[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanRight[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_right2), spriteSize, spriteSize, false);
-        pacmanRight[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanRight[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_right3), spriteSize, spriteSize, false);
-        pacmanRight[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanRight[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_right), spriteSize, spriteSize, false);
 
 
         // Add bitmap images of pacman facing left
-        pacmanLeft = new Bitmap[totalFrame];
-        pacmanLeft[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanLeft = new Bitmap[totalFrame];
+        mPacmanLeft[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_left1), spriteSize, spriteSize, false);
-        pacmanLeft[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanLeft[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_left2), spriteSize, spriteSize, false);
-        pacmanLeft[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanLeft[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_left3), spriteSize, spriteSize, false);
-        pacmanLeft[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanLeft[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_left), spriteSize, spriteSize, false);
 
         // Add bitmap images of pacman facing up
-        pacmanUp = new Bitmap[totalFrame];
-        pacmanUp[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanUp = new Bitmap[totalFrame];
+        mPacmanUp[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_up1), spriteSize, spriteSize, false);
-        pacmanUp[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanUp[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_up2), spriteSize, spriteSize, false);
-        pacmanUp[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanUp[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_up3), spriteSize, spriteSize, false);
-        pacmanUp[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanUp[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_up), spriteSize, spriteSize, false);
 
         // Add bitmap images of pacman facing down
-        pacmanDown = new Bitmap[totalFrame];
-        pacmanDown[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanDown = new Bitmap[totalFrame];
+        mPacmanDown[0] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_down1), spriteSize, spriteSize, false);
-        pacmanDown[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanDown[1] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_down2), spriteSize, spriteSize, false);
-        pacmanDown[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanDown[2] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_down3), spriteSize, spriteSize, false);
-        pacmanDown[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mPacmanDown[3] = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.pacman_down), spriteSize, spriteSize, false);
 
-        ghost1Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mGhost1Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost), spriteSize, spriteSize, false);
-        ghostBitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mGhostBitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost1_red), spriteSize, spriteSize, false);
         if (gameMode == GameMode.GHOST) {
-            currentGhost1Bitmap = ghostBitmapSelected;
+            mCurrentGhost1Bitmap = mGhostBitmapSelected;
         } else {
-            currentGhost1Bitmap = ghost1Bitmap;
+            mCurrentGhost1Bitmap = mGhost1Bitmap;
         }
 
         ghost2Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost2), spriteSize, spriteSize, false);
-        currentGhost2Bitmap = ghost2Bitmap;
-        ghost2BitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mCurrentGhost2Bitmap = ghost2Bitmap;
+        mGhost2BitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost2_red), spriteSize, spriteSize, false);
 
         ghost3Bitmap = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost3), spriteSize, spriteSize, false);
         currentGhost3Bitmap = ghost3Bitmap;
-        ghost3BitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
+        mGhost3BitmapSelected = Bitmap.createScaledBitmap(BitmapFactory.decodeResource(
                 getResources(), R.drawable.ghost3_red), spriteSize, spriteSize, false);
 
         Log.d(TAG, "loadBitmapImages: finished loading bitmap images");

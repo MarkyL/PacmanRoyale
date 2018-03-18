@@ -31,13 +31,6 @@ public class UserInformation {
     public void setStatus(String status) {
         this.status = status;
     }
-//    public UserPresence getUserPresence() {
-//        return userPresence;
-//    }
-//
-//    public void setUserPresence(UserPresence userPresence) {
-//        this.userPresence = userPresence;
-//    }
 
     public Pacman getPacman() {
         return pacman;
@@ -62,11 +55,7 @@ public class UserInformation {
     public void setUserId(String userId) {
         this.userId = userId;
     }
-
-//    public int getblocksize() { return blocksize;  }
-//
-//    public void setblocksize(int blockSize) { this.blocksize = blockSize; }
-
+    
     public int getScreenwidth() {
         return screenwidth;
     }

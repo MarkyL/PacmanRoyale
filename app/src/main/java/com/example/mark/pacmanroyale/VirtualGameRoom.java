@@ -22,7 +22,6 @@ public class VirtualGameRoom {
     Ghost enemyGhost;
 
     //need to know who is pacman who is ghost.
-
     public VirtualGameRoom(String userID1, String userID2, boolean amIPacman) {
         this.userID1 = userID1;
         this.userID2 = userID2;
@@ -39,7 +38,4 @@ public class VirtualGameRoom {
         return userID2;
     }
 
-    public void disconnectVirtualGameRoom() {
-
-    }
 }

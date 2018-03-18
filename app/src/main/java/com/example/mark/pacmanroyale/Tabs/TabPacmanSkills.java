@@ -29,15 +29,11 @@ public class TabPacmanSkills extends Fragment {
     TextView pacmanNumGames;
     TextView pacmanWinRatio;
     Button invisibleSkillButton;
-    private int wins = -1;
-    private int totalGames = -1;
-    private String winRatio =null;
-
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.tab_pacman_skills,container,false);
+        View rootView = inflater.inflate(R.layout.tab_pacman_skills, container, false);
         pacmanNumWins = rootView.findViewById(R.id.pacmanNumWins);
         pacmanNumGames = rootView.findViewById(R.id.pacmanNumGames);
         pacmanWinRatio = rootView.findViewById(R.id.pacmanWinRatio);
@@ -48,28 +44,22 @@ public class TabPacmanSkills extends Fragment {
                 showSkill();
             }
         });
-
-        //updateStatViews();
-
         return rootView;
     }
 
     private void showSkill() {
 
-                AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
-                View mView = getLayoutInflater().inflate(R.layout.skill_dialog, null);
-                TextView description = mView.findViewById(R.id.description);
-                Button endGameButton = mView.findViewById(R.id.skillButton);
+        AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
+        View mView = getLayoutInflater().inflate(R.layout.skill_dialog, null);
+        TextView description = mView.findViewById(R.id.description);
 
-                String skillDescription = "Shh... you are INVISIBLE!\nGhosts can't see you but they can sense your presence..\nWATCH YOUR BACK!";
-                //String loseMsg = "Ohh... have a better luck next time";
-                description.setText(skillDescription);
+        String skillDescription = getString(R.string.invisibility_description);
+        description.setText(skillDescription);
 
-
-                mBuilder.setView(mView);
-                AlertDialog dialog = mBuilder.create();
-                dialog.show();
-            }
+        mBuilder.setView(mView);
+        AlertDialog dialog = mBuilder.create();
+        dialog.show();
+    }
 
 
     @Override
@@ -79,43 +69,30 @@ public class TabPacmanSkills extends Fragment {
     }
 
     private void updateStatViews() {
-
         FireBaseUtils.getFireBasePacmanNodeReference(getContext()).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 if (dataSnapshot.hasChild(getResources().getString(R.string.wins))) {
                     int wins = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.wins)).getValue().toString());
-                    pacmanNumWins.setText(""+wins);
+                    pacmanNumWins.setText(String.valueOf(wins));
                 }
-
 
                 if (dataSnapshot.hasChild(getResources().getString(R.string.totalGames))) {
                     int totalGames = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.totalGames)).getValue().toString());
-                    pacmanNumGames.setText(""+totalGames);
+                    pacmanNumGames.setText(String.valueOf(totalGames));
                 }
 
                 if (dataSnapshot.hasChild(getResources().getString(R.string.winRatio))) {
-                   String winRatio = dataSnapshot.child(getResources().getString(R.string.winRatio)).getValue().toString();
-                    pacmanWinRatio.setText(""+winRatio);
+                    String winRatio = dataSnapshot.child(getResources().getString(R.string.winRatio)).getValue().toString();
+                    pacmanWinRatio.setText(String.valueOf(winRatio));
                 }
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
 
     }
-
-
-
-
-
-
-
-
-
 }

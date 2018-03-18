@@ -30,5 +30,4 @@ public class SwipeableViewPager extends ViewPager {
         }
         return false;
     }
-
 }

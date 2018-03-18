@@ -115,5 +115,8 @@
         Mark Lurie \u0020 \u0020 \u0020 \u0020 Omri Ohayon
 
     </string>
+    <string name="tunneling">TUNNELING</string>
+    <string name="tunneling_description">Tunneling is forbidden for GHOSTS! BUT , Sometimes when no one pays attention they sneak in and by a mysterious way they appear on the other side</string>
+    <string name="invisibility_description">Shh... you are INVISIBLE! Ghosts can\'t see you but they can sense your presence.. WATCH YOUR BACK!</string>
 
 </resources>

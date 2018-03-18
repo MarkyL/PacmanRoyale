@@ -23,41 +23,37 @@ import com.google.firebase.database.ValueEventListener;
 
 public class TabGhostSkills extends Fragment {
 
-    TextView ghostNumWins;
-    TextView ghostNumGames;
-    TextView ghostWinRatio;
-    Button tunnelingSkillButton;
+    TextView mGhostNumWins;
+    TextView mGhostNumGames;
+    TextView mGhostWinRatio;
+    Button mTunnelingSkillButton;
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.tab_ghost_skills,container,false);
-        ghostNumWins = rootView.findViewById(R.id.ghostNumWins);
-        ghostNumGames = rootView.findViewById(R.id.ghostNumGames);
-        ghostWinRatio = rootView.findViewById(R.id.ghostWinRatio);
-        tunnelingSkillButton = rootView.findViewById(R.id.ghostSkillButton);
-        tunnelingSkillButton.setOnClickListener(new View.OnClickListener() {
+        View rootView = inflater.inflate(R.layout.tab_ghost_skills, container, false);
+        mGhostNumWins = rootView.findViewById(R.id.ghostNumWins);
+        mGhostNumGames = rootView.findViewById(R.id.ghostNumGames);
+        mGhostWinRatio = rootView.findViewById(R.id.ghostWinRatio);
+        mTunnelingSkillButton = rootView.findViewById(R.id.ghostSkillButton);
+        mTunnelingSkillButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 showSkill();
             }
         });
-
         return rootView;
     }
 
     private void showSkill() {
-
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
         View mView = getLayoutInflater().inflate(R.layout.skill_dialog, null);
         TextView description = mView.findViewById(R.id.description);
         Button endGameButton = mView.findViewById(R.id.skillButton);
 
-        String skillDescription = "Tunneling is forbidden for GHOSTS!\nBUT , Sometimes when no one pays attention they sneak in and by a mysterious way they appear on the other side";
-        //String loseMsg = "Ohh... have a better luck next time";
+        String skillDescription = getString(R.string.tunneling_description);
         description.setText(skillDescription);
-        endGameButton.setText("TUNNELING");
-
+        endGameButton.setText(R.string.tunneling);
 
         mBuilder.setView(mView);
         AlertDialog dialog = mBuilder.create();
@@ -78,28 +74,23 @@ public class TabGhostSkills extends Fragment {
 
                 if (dataSnapshot.hasChild(getResources().getString(R.string.wins))) {
                     int wins = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.wins)).getValue().toString());
-                    ghostNumWins.setText(""+wins);
+                    mGhostNumWins.setText(String.valueOf(wins));
                 }
-
 
                 if (dataSnapshot.hasChild(getResources().getString(R.string.totalGames))) {
                     int totalGames = Integer.parseInt(dataSnapshot.child(getResources().getString(R.string.totalGames)).getValue().toString());
-                    ghostNumGames.setText(""+totalGames);
+                    mGhostNumGames.setText(String.valueOf(totalGames));
                 }
 
                 if (dataSnapshot.hasChild(getResources().getString(R.string.winRatio))) {
                     String winRatio = dataSnapshot.child(getResources().getString(R.string.winRatio)).getValue().toString();
-                    ghostWinRatio.setText(""+winRatio);
+                    mGhostWinRatio.setText(String.valueOf(winRatio));
                 }
-
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
-
-
     }
 }

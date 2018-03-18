@@ -9,7 +9,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -29,53 +28,44 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     private static final String GAME_MODE = "GAME_MODE";
     private static final int DEFAULT_PACMAN_VISIBILITY = 255;
 
-    private static PlayActivity activity;
-    private DrawingView drawingView;
-    private ImageView loaderImage;
-    private Button skillButton;
-    private TextView skillTimeTV;
+    private DrawingView mDrawingView;
+    private Button mSkillButton;
+    private TextView mSkillTimeTV;
     private TextView percentageTV;
-    private GameMode gameMode;
+    private GameMode mGameMode;
 
-    float x1, y1, x2, y2;
-
-    private LinearLayout surfaceView;
+    private LinearLayout mSurfaceView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_play);
-        activity = this;
+        mGameMode = (GameMode) getIntent().getSerializableExtra(GAME_MODE);
         initUI();
     }
 
     private void initUI() {
-        //loaderImage = findViewById(R.id.play_loader);
-        surfaceView = findViewById(R.id.middleSurface);
+        mSurfaceView = findViewById(R.id.middleSurface);
         percentageTV = findViewById(R.id.percentageTV);
-        skillButton = findViewById(R.id.skillBtn);
-        skillButton.setOnClickListener(this);
-        if (gameMode == GameMode.GHOST) {
-            skillButton.setText("TUNNELING");
+        mSkillButton = findViewById(R.id.skillBtn);
+        mSkillButton.setOnClickListener(this);
+        if (mGameMode == GameMode.GHOST) {
+            mSkillButton.setText(R.string.tunneling);
         }
-        skillTimeTV = findViewById(R.id.skillTimeTV);
+        mSkillTimeTV = findViewById(R.id.skillTimeTV);
     }
 
     @Override
     protected void onResume() {
         Log.d(TAG, "onResume");
         super.onResume();
-        if (drawingView == null) { // meaning we are not initialized yet - let's initialize then.
-            gameMode = (GameMode) getIntent().getSerializableExtra(GAME_MODE);
-            drawingView = new DrawingView(this, (GameMode) getIntent().getSerializableExtra(GAME_MODE));
-            surfaceView.addView(drawingView);
-            drawingView.setCanDrawState(true);
-        }
-        if (gameMode == GameMode.VS_PC) {
-            //loaderImage.setVisibility(View.INVISIBLE);
+        if (mDrawingView == null) { // meaning we are not initialized yet - let's initialize.
+            mDrawingView = new DrawingView(this, (GameMode) getIntent().getSerializableExtra(GAME_MODE));
+            mSurfaceView.addView(mDrawingView);
+            mDrawingView.setCanDrawState(true);
         }
         initJoyStick();
-        drawingView.resume();
+        mDrawingView.resume();
     }
 
     public void setVisibilities() {
@@ -85,22 +75,20 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 try {
                     Thread.sleep(3500);
                 } catch (InterruptedException e) {
+                    e.printStackTrace();
                 }
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         Log.d(TAG, "setVisibilities() setting visibilities");
-                        //loaderImage.setVisibility(View.INVISIBLE);
-                        surfaceView.setVisibility(View.VISIBLE);
-                       if (gameMode != GameMode.GHOST) {
-                           skillButton.setVisibility(View.VISIBLE);
-                           skillTimeTV.setVisibility(View.VISIBLE);
+                        mSurfaceView.setVisibility(View.VISIBLE);
+                       if (mGameMode != GameMode.GHOST) {
+                           mSkillButton.setVisibility(View.VISIBLE);
+                           mSkillTimeTV.setVisibility(View.VISIBLE);
                         }
                         else{
-                           skillButton.setText("TUNNELING");
-                           skillButton.setVisibility(View.VISIBLE);
-                           skillTimeTV.setVisibility(View.VISIBLE);
-
+                           mSkillButton.setVisibility(View.VISIBLE);
+                           mSkillTimeTV.setVisibility(View.VISIBLE);
                        }
                     }
                 });
@@ -125,31 +113,31 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 String loseMsg = getString(R.string.game_lost);
 
                 if(isPacman) {
-                    if(gameMode == GameMode.PACMAN)
+                    if(mGameMode == GameMode.PACMAN)
                         endGameMsg.setText(winMsg);
-                    else if(gameMode == GameMode.GHOST){
+                    else if(mGameMode == GameMode.GHOST){
                         endGameMsg.setText(loseMsg);
                     }
                     else
                         endGameMsg.setText(winMsg);
 
                     UserInformationUtils.setUserPresenceOnline(PlayActivity.this);
-                    if(gameMode != GameMode.VS_PC) {
+                    if(mGameMode != GameMode.VS_PC) {
                         VirtualRoomUtils.setVirtualGameRoom(null);
                         FireBaseUtils.getFireBaseVirtualRoomReference(PlayActivity.this).removeValue();
                     }
                 }
                 else{
-                    if(gameMode == GameMode.PACMAN)
+                    if(mGameMode == GameMode.PACMAN)
                         endGameMsg.setText(loseMsg);
-                    else if(gameMode == GameMode.GHOST){
+                    else if(mGameMode == GameMode.GHOST){
                         endGameMsg.setText(winMsg);
                     }
                     else
                         endGameMsg.setText(loseMsg);
 
                     UserInformationUtils.setUserPresenceOnline(PlayActivity.this);
-                    if(gameMode != GameMode.VS_PC) {
+                    if(mGameMode != GameMode.VS_PC) {
                         VirtualRoomUtils.setVirtualGameRoom(null);
                         FireBaseUtils.getFireBaseVirtualRoomReference(PlayActivity.this).removeValue();
                     }
@@ -173,7 +161,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
     protected void onPause() {
         Log.d(TAG, "onPause");
         super.onPause();
-        drawingView.pause();
+        mDrawingView.pause();
     }
 
     @Override
@@ -183,17 +171,15 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             VirtualRoomUtils.getVirtualRoomReference().removeValue();
         }
         super.onDestroy();
-        //FireBaseUtils.setUserPresenceOffline(this);
     }
 
-
     public void activeSkill() {
-        if (gameMode != GameMode.GHOST) {
-            drawingView.goInvisible(125);
-            skillButton.setEnabled(false);
+        if (mGameMode != GameMode.GHOST) {
+            mDrawingView.goInvisible(125);
+            mSkillButton.setEnabled(false);
         } else {
-            drawingView.mGoThroughTunnelEnabled = true;
-            skillButton.setEnabled(false);
+            mDrawingView.mGoThroughTunnelEnabled = true;
+            mSkillButton.setEnabled(false);
         }
 
         new CountDownTimer(3000, 100) {
@@ -202,45 +188,42 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                 int seconds = (int) (l / 1000);
                 int milliSeconds = (int) (l % 1000) / 100;
                 String timeLeft = String.valueOf(seconds) + "." + String.valueOf(milliSeconds);
-                skillTimeTV.setText(timeLeft);
+                mSkillTimeTV.setText(timeLeft);
             }
 
             @Override
             public void onFinish() {
-                skillTimeTV.setText("");
+                mSkillTimeTV.setText("");
             }
-
         }.start();
 
         final Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                if (gameMode != GameMode.GHOST) {
-                    drawingView.goInvisible(DEFAULT_PACMAN_VISIBILITY);
-                } else if (gameMode == GameMode.GHOST) {
-                    drawingView.mGoThroughTunnelEnabled = false;
+                if (mGameMode != GameMode.GHOST) {
+                    mDrawingView.goInvisible(DEFAULT_PACMAN_VISIBILITY);
+                } else if (mGameMode == GameMode.GHOST) {
+                    mDrawingView.mGoThroughTunnelEnabled = false;
                 }
             }
         }, 3000);
-
-
         handler.postDelayed(new Runnable() {
             @Override
             public void run() {
-                skillButton.setEnabled(true);
+                mSkillButton.setEnabled(true);
             }
         }, 12000);
-
     }
 
     @Override
     public void setPercentage(final String percentage) {
-        //percentageTV
+
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                percentageTV.setText(percentage + "%");
+                String textViewMsg = percentage + "%";
+                percentageTV.setText(textViewMsg);
             }
         });
     }
@@ -251,7 +234,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             joystick.setVisibility(View.INVISIBLE);
             return; // user did not want joyStick.
         }
-        if (gameMode == GameMode.GHOST) {
+        if (mGameMode == GameMode.GHOST) {
             joystick.setButtonDrawable(getResources().getDrawable(R.drawable.ghost_60x60));
         }
         joystick.setOnMoveListener(new JoystickView.OnMoveListener() {
@@ -259,19 +242,20 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
             public void onMove(int angle, int strength) {
                 // Angles -
                 // Up 45-135 , Left 135-225 , Down 225-315 , Right 315-45
+                // Excluding angle 0 - the center counts as 0 as well, we don't want that.
                 Log.d(TAG, "onMove: angle = " + angle);
                 if (angle >= 45 && angle < 135) {
                     Log.d(TAG, "onMove: Up");
-                    drawingView.setNextDirection(0);
+                    mDrawingView.setNextDirection(0);
                 } else if (angle >= 135 && angle < 225) {
                     Log.d(TAG, "onMove: Left");
-                    drawingView.setNextDirection(3);
+                    mDrawingView.setNextDirection(3);
                 } else if (angle >= 225 && angle < 315) {
                     Log.d(TAG, "onMove: Down");
-                    drawingView.setNextDirection(2);
+                    mDrawingView.setNextDirection(2);
                 } else if ((angle >= 315 && angle < 360) || (angle > 0 && angle < 45)){
                     Log.d(TAG, "onMove: Right");
-                    drawingView.setNextDirection(1);
+                    mDrawingView.setNextDirection(1);
                 }
             }
         },500);
@@ -291,7 +275,6 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                     .setNegativeButton(R.string.cancel, null);
             AlertDialog dialog = builder.create();
             dialog.show();
-
     }
 
     @Override

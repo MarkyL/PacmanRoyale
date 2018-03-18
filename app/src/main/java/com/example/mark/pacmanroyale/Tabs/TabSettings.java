@@ -28,8 +28,6 @@ import com.google.firebase.database.ValueEventListener;
 public class TabSettings extends Fragment implements View.OnClickListener{
     private static final String TAG = "TabSettings";
 
-    private Button mLogoutBtn;
-    private Button mCreditsBtn;
     private Switch mSFXSwitch;
     private Switch mMusicSwitch;
     private Switch mJoystickSwitch;
@@ -37,19 +35,19 @@ public class TabSettings extends Fragment implements View.OnClickListener{
     private IdestroyService idestroyService;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_settings, container, false);
 
-        mLogoutBtn = rootView.findViewById(R.id.logOutBtn);
-        mCreditsBtn = rootView.findViewById(R.id.credits);
+        Button mLogoutBtn = rootView.findViewById(R.id.logOutBtn);
+        Button mCreditsBtn = rootView.findViewById(R.id.credits);
         mSFXSwitch = rootView.findViewById(R.id.sfx_switch);
         mMusicSwitch = rootView.findViewById(R.id.music_switch);
         mJoystickSwitch = rootView.findViewById(R.id.joystick_switch);
         //set Switch State From Firebase
         setSwitchStateFromFireBase();
 
-        //adding listeners to all clickables
+        //adding listeners to all clickable
         mLogoutBtn.setOnClickListener(this);
         mCreditsBtn.setOnClickListener(this);
         mSFXSwitch.setOnClickListener(this);
@@ -80,45 +78,38 @@ public class TabSettings extends Fragment implements View.OnClickListener{
                     boolean sfxBool = (boolean) dataSnapshot.child(getResources().getString(R.string.SFX)).getValue();
                     mSFXSwitch.setChecked(sfxBool);
                 }
-
             }
-
             @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
+            public void onCancelled(DatabaseError databaseError) {}
         });
-
     }
-
 
     @Override
     public void onClick(View view) {
+        boolean isChecked;
         switch (view.getId()){
             case (R.id.joystick_switch): {
-               boolean isChecked =  mJoystickSwitch.isChecked();
+               isChecked =  mJoystickSwitch.isChecked();
                UserInformationUtils.getUserInformation().setJoystick(isChecked);
                FireBaseUtils.getUserFireBaseDataBaseReference(getContext()).child(getString(R.string.joystick)).setValue(isChecked);
             } break;
             case (R.id.music_switch): {
-                boolean isChecked =  mMusicSwitch.isChecked();
+                isChecked =  mMusicSwitch.isChecked();
                 UserInformationUtils.getUserInformation().setMusic(isChecked);
-                FireBaseUtils.getUserFireBaseDataBaseReference(getContext()).child(getString(R.string.music)).setValue(isChecked);
+                FireBaseUtils.getUserFireBaseDataBaseReference(getContext())
+                        .child(getString(R.string.music)).setValue(isChecked);
                 idestroyService.handleMediaPlayerService(isChecked);
             } break;
             case (R.id.sfx_switch): {
-                boolean isChecked =  mSFXSwitch.isChecked();
+                isChecked =  mSFXSwitch.isChecked();
                 UserInformationUtils.getUserInformation().setSfx(isChecked);
-                FireBaseUtils.getUserFireBaseDataBaseReference(getContext()).child(getString(R.string.SFX)).setValue(isChecked);
-
+                FireBaseUtils.getUserFireBaseDataBaseReference(getContext())
+                        .child(getString(R.string.SFX)).setValue(isChecked);
             } break;
             case (R.id.credits): {
-
                 showCredits();
-
             } break;
             case (R.id.logOutBtn): {
-               // FirebaseAuth.getInstance().signOut();
                 UserInformationUtils.setUserPresenceOffline(getContext());
                 AuthUI.getInstance()
                         .signOut(getContext())
@@ -129,16 +120,12 @@ public class TabSettings extends Fragment implements View.OnClickListener{
                                 getActivity().finish();
                             }
                         });
-
             } break;
         }
     }
     private void showCredits() {
-
         AlertDialog.Builder mBuilder = new AlertDialog.Builder(getContext());
         View mView = getLayoutInflater().inflate(R.layout.credits_dialog, null);
-//        TextView description = mView.findViewById(R.id.creditMsg);
-
         mBuilder.setView(mView);
         AlertDialog dialog = mBuilder.create();
         dialog.show();

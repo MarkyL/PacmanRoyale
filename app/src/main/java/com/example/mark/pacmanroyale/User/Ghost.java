@@ -1,8 +1,5 @@
 package com.example.mark.pacmanroyale.User;
 
-import java.math.BigDecimal;
-import java.text.DecimalFormat;
-
 /**
  * Created by Omri on 2/17/2018.
  */
@@ -17,9 +14,7 @@ public class Ghost {
     private int totalGames;
     private String winRatio;
 
-    public Ghost (){
-
-    }
+    public Ghost (){ }
 
     public Ghost(int level, int experience, int xPos, int yPos , int wins , int totalGames ) {
         this.level = level;
@@ -30,7 +25,6 @@ public class Ghost {
         this.totalGames = totalGames;
         this.winRatio = "0";
     }
-
 
     public String getWinRatio() {
         if(totalGames > 0) {

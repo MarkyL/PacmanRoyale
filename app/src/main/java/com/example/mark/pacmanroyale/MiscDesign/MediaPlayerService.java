@@ -27,7 +27,7 @@ public class MediaPlayerService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d(TAG, "onCreate: 1");
+        Log.d(TAG, "onCreate:");
         backGroundPlayer = MediaPlayer.create(this, R.raw.pacman_song);
         backGroundPlayer.setLooping(true); // infinite while supposed to play
         backGroundPlayer.setVolume(0.1f,0.1f);
@@ -35,7 +35,7 @@ public class MediaPlayerService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCommand: 1");
+        Log.d(TAG, "onStartCommand:");
         backGroundPlayer.start();
         return START_STICKY;
     }

@@ -2,13 +2,13 @@ package com.example.mark.pacmanroyale.Tabs;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.example.mark.pacmanroyale.Activities.PlayActivity;
@@ -23,20 +23,17 @@ import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 
 public class TabPlay extends Fragment implements View.OnClickListener {
 
-    private static final String TAG = "TabPlay";
-    private ImageView imageView;
     private static final String GAME_MODE = "GAME_MODE";
 
     private ISearchMatchInterface iViewInterface;
 
-    private FrameLayout loadingLayout;
-    private LinearLayout buttonsLayout;
-    private Button mCancelMatchMakingBtn;
-    private boolean firstLoad = true;
+    private FrameLayout mLoadingLayout;
+    private LinearLayout mButtonsLayout;
+    private boolean mFirstLoad = true;
     private GameMode mGameMode;
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.tab_play, container, false);
 
@@ -44,10 +41,10 @@ public class TabPlay extends Fragment implements View.OnClickListener {
         rootView.findViewById(R.id.playAsPacmanBtn).setOnClickListener(this);
         rootView.findViewById(R.id.playAsGhostBtn).setOnClickListener(this);
 
-        loadingLayout = rootView.findViewById(R.id.loading_layout);
-        buttonsLayout = rootView.findViewById(R.id.buttons_layout);
+        mLoadingLayout = rootView.findViewById(R.id.loading_layout);
+        mButtonsLayout = rootView.findViewById(R.id.buttons_layout);
 
-        mCancelMatchMakingBtn = rootView.findViewById(R.id.cancelMatchMakingBtn);
+        Button mCancelMatchMakingBtn = rootView.findViewById(R.id.cancelMatchMakingBtn);
         mCancelMatchMakingBtn.setOnClickListener(this);
 
         iViewInterface = (ISearchMatchInterface) getContext();
@@ -86,8 +83,6 @@ public class TabPlay extends Fragment implements View.OnClickListener {
                 }
                 toggleLayoutVisibilities(false); // I saw loader , need to toggle now.
                 iViewInterface.toggleSearchingForMatch(false);
-//                iViewInterface.toggleTabsVisibility(true); // return the tabs of the main activity.
-//                iViewInterface.toggleBackPressAvailability(true);
             }
             break;
         }
@@ -100,24 +95,23 @@ public class TabPlay extends Fragment implements View.OnClickListener {
 
     public void toggleLayoutVisibilities(boolean isLoadingLayoutVisible) {
         if (isLoadingLayoutVisible) {
-            buttonsLayout.setVisibility(View.INVISIBLE);
-            loadingLayout.setVisibility(View.VISIBLE);
+            mButtonsLayout.setVisibility(View.INVISIBLE);
+            mLoadingLayout.setVisibility(View.VISIBLE);
         } else {
-            buttonsLayout.setVisibility(View.VISIBLE);
-            loadingLayout.setVisibility(View.INVISIBLE);
+            mButtonsLayout.setVisibility(View.VISIBLE);
+            mLoadingLayout.setVisibility(View.INVISIBLE);
         }
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        if (!firstLoad) {
+        if (!mFirstLoad) {
             toggleLayoutVisibilities(false);
             iViewInterface.toggleSearchingForMatch(false);
         }
-        firstLoad = false;
+        mFirstLoad = false;
     }
-
 
     @Override
     public void onDestroy() {
@@ -127,6 +121,5 @@ public class TabPlay extends Fragment implements View.OnClickListener {
     public interface ISearchMatchInterface {
         void toggleSearchingForMatch(boolean isSearching);
     }
-
 }
 
