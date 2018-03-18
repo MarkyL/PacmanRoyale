@@ -326,6 +326,7 @@ public class MainActivity extends AppCompatActivity implements TabPlay.ISearchMa
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             MainActivity.super.onBackPressed();
+                            UserInformationUtils.setUserPresenceOffline(MainActivity.this); // incase ondestroy won't catch it
                         }
                     })
                     .setNegativeButton(R.string.cancel, null);

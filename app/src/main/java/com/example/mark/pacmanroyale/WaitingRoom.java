@@ -10,6 +10,7 @@ import com.example.mark.pacmanroyale.Enums.GameMode;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
+import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -179,6 +180,7 @@ public class WaitingRoom {
         dbWaitingListReference.removeValue();
         UserInformationUtils.setUserPresenceOnline(context);
         ghostWaitingList.remove(userID);
+        WaitingRoomUtils.getWaitingRoom().ghostWaitingList.remove(userID);
     }
 
     private void cancelListenToInvites() {
@@ -221,9 +223,6 @@ public class WaitingRoom {
                 if (ghostWaitingList.size() > 0) { // I found someone to play with
                     foundMatch = true;
                     enemyID = ghostWaitingList.get(0);
-                    boolean isRemoved = ghostWaitingList.remove(enemyID);
-                    Log.d(TAG, "doInBackground: isRemoved = " +isRemoved);
-                    Log.d(TAG, "doInBackground: ghost list " + (ghostWaitingList.size()>0?ghostWaitingList.get(0):"empty"));
                     retrieveEnemyBlockSize();
                     FireBaseUtils.getFireBaseGhostWaitingList(context).child(enemyID).setValue(userID);
                     dbWaitingListReference.removeValue();

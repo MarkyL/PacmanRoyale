@@ -18,6 +18,7 @@ import com.example.mark.pacmanroyale.R;
 import com.example.mark.pacmanroyale.Utilities.FireBaseUtils;
 import com.example.mark.pacmanroyale.Utilities.UserInformationUtils;
 import com.example.mark.pacmanroyale.Utilities.VirtualRoomUtils;
+import com.example.mark.pacmanroyale.Utilities.WaitingRoomUtils;
 
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
@@ -66,6 +67,10 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
         }
         initJoyStick();
         mDrawingView.resume();
+
+        boolean isRemoved = WaitingRoomUtils.getWaitingRoom().getGhostWaitingList()
+                .remove(VirtualRoomUtils.getVirtualGameRoom().getUserID2());
+        Log.d(TAG, "onResume: isRemoved = " + isRemoved);
     }
 
     public void setVisibilities() {
@@ -270,6 +275,7 @@ public class PlayActivity extends AppCompatActivity implements DrawingView.Iinte
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             PlayActivity.super.onBackPressed();
+                            UserInformationUtils.setUserPresenceOnline(PlayActivity.this);
                         }
                     })
                     .setNegativeButton(R.string.cancel, null);
